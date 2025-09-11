@@ -11,4 +11,5 @@ export const ENV = Object.freeze({
     EXECUTABLE_PATH: get('EXECUTABLE_PATH').required().asString(),
     TOA_EXECUTION_HOUR: get('TOA_EXECUTION_HOUR').required().asIntPositive(),
     TOA_EXECUTION_TMINUTE: get('TOA_EXECUTION_TMINUTE').required().asIntPositive(),
+    LOOKBACK_DAYS: get('LOOKBACK_DAYS').required().asIntPositive(),
 })

@@ -21,13 +21,16 @@
   },
   "homepage": "https://github.com/LOGIFLOW-ERP/scraper-logiflowerp#readme",
   "dependencies": {
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.2",
     "env-var": "^7.5.0",
     "logiflowerp-sdk": "^1.0.205",
     "mongodb": "^6.19.0",
     "node-cron": "^4.2.1",
     "nodemailer": "^7.0.6",
     "puppeteer-core": "^24.19.0",
-    "reflect-metadata": "^0.2.2"
+    "reflect-metadata": "^0.2.2",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/nodemailer": "^7.0.1",
