@@ -9,6 +9,7 @@ async function startScheduler() {
             await BootstrapTOA()
         })
 
+        console.log(`✅ Jobs programados con cron`)
     } catch (error) {
         console.error(error);
     }
