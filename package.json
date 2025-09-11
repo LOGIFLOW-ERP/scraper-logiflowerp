@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node-dev --env-file=.env --files -r tsconfig-paths/register --respawn src/index.ts"
+    "dev": "ts-node-dev --env-file=.env --files -r tsconfig-paths/register --respawn src/index.ts",
+    "build": "npx tsc && tsc-alias",
+    "start": "node build/src/index.js"
   },
   "repository": {
     "type": "git",
