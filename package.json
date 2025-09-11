@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "ts-node-dev --env-file=.env --files -r tsconfig-paths/register --respawn src/index.ts"
   },
   "repository": {
     "type": "git",
@@ -17,5 +17,20 @@
   "bugs": {
     "url": "https://github.com/LOGIFLOW-ERP/scraper-logiflowerp/issues"
   },
-  "homepage": "https://github.com/LOGIFLOW-ERP/scraper-logiflowerp#readme"
+  "homepage": "https://github.com/LOGIFLOW-ERP/scraper-logiflowerp#readme",
+  "dependencies": {
+    "env-var": "^7.5.0",
+    "logiflowerp-sdk": "^1.0.205",
+    "mongodb": "^6.19.0",
+    "nodemailer": "^7.0.6",
+    "puppeteer-core": "^24.19.0",
+    "reflect-metadata": "^0.2.2"
+  },
+  "devDependencies": {
+    "@types/nodemailer": "^7.0.1",
+    "node-cron": "^4.2.1",
+    "ts-node-dev": "^2.0.0",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.9.2"
+  }
 }
