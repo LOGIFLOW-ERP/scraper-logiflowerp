@@ -1,6 +1,6 @@
 import { Page } from 'puppeteer-core';
 
-export class PageFetcher {
+export class PageFetcherCSV {
     private page: Page;
 
     constructor(page: Page) {

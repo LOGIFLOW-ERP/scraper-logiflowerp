@@ -44,6 +44,7 @@ export class DataScraperTOAENTITY {
     'Time Slot'?: string | number;
 
     @IsOptional()
+     @Transform(({ value }) => typeof value === 'number' ? value.toString() : value)
     @IsString({ message: 'Localidad debe ser una cadena de texto' })
     @Expose()
     Localidad?: string
@@ -441,42 +442,14 @@ export class DataScraperTOAENTITY {
     'Direccion errada/incompleta': string
 
     @IsOptional()
-    @IsString({ message: 'Respuesta de Whatsapp Botmaker debe ser una cadena de texto' })
-    @Expose()
-    'Respuesta de Whatsapp Botmaker'?: string
-
-    @IsOptional()
     @IsString({ message: 'ID de le sesión en botmaker debe ser una cadena de texto' })
     @Expose()
     'ID de le sesión en botmaker'?: string
 
     @IsOptional()
-    @IsNumber({}, { message: 'Hora de envío del mensaje de WhatsApp debe ser un número' })
-    @Expose()
-    'Hora de envío del mensaje de WhatsApp'?: number
-
-    @IsOptional()
-    @ValidateIf((o) => typeof o['Hora de respuesta al mensaje de WhatsApp'] === 'number')
-    @IsNumber({}, { message: 'Hora de respuesta al mensaje de WhatsApp debe ser un número cuando es numérico' })
-    @ValidateIf((o) => typeof o['Hora de respuesta al mensaje de WhatsApp'] === 'string')
-    @IsString({ message: 'Hora de respuesta al mensaje de WhatsApp debe ser un texto cuando es string' })
-    @Expose()
-    'Hora de respuesta al mensaje de WhatsApp'?: number | string
-
-    @IsOptional()
-    @IsString({ message: 'Respuesta al mensaje de WhatsApp debe ser una cadena de texto' })
-    @Expose()
-    'Respuesta al mensaje de WhatsApp'?: string
-
-    @IsOptional()
     @IsString({ message: 'Identificador de la plantilla a enviar a botmaker debe ser una cadena de texto' })
     @Expose()
     'Identificador de la plantilla a enviar a botmaker'?: string
-
-    @IsOptional()
-    @IsNumber({}, { message: 'Número de WhatsApp de Telefónica debe ser un número' })
-    @Expose()
-    'Número de WhatsApp de Telefónica'?: number
 
     @IsDefined({ message: 'MigraxPeinado es requerido' })
     @IsString({ message: 'MigraxPeinado debe ser una cadena de texto' })
@@ -484,39 +457,14 @@ export class DataScraperTOAENTITY {
     MigraxPeinado!: string
 
     @IsOptional()
-    @IsString({ message: 'Respuesta de Whatsapp Botmaker 10105 debe ser una cadena de texto' })
-    @Expose()
-    'Respuesta de Whatsapp Botmaker 10105'?: string
-
-    @IsOptional()
     @IsString({ message: 'ID de le sesión en botmaker 10105 debe ser una cadena de texto' })
     @Expose()
     'ID de le sesión en botmaker 10105'?: string
 
     @IsOptional()
-    @IsNumber({}, { message: 'Hora de envío del mensaje de WhatsApp 10105 debe ser un número' })
-    @Expose()
-    'Hora de envío del mensaje de WhatsApp 10105'?: number
-
-    @IsOptional()
-    @IsNumber({}, { message: 'Hora de respuesta al mensaje de WhatsApp 10105 debe ser un número' })
-    @Expose()
-    'Hora de respuesta al mensaje de WhatsApp 10105'?: number
-
-    @IsOptional()
-    @IsString({ message: 'Respuesta al mensaje de WhatsApp 10105 debe ser una cadena de texto' })
-    @Expose()
-    'Respuesta al mensaje de WhatsApp 10105'?: string
-
-    @IsOptional()
     @IsString({ message: 'Identificador de la plantilla a enviar a botmaker 10105 debe ser una cadena de texto' })
     @Expose()
     'Identificador de la plantilla a enviar a botmaker 10105'?: string
-
-    @IsOptional()
-    @IsNumber({}, { message: 'Número de WhatsApp de Telefónica 10105 debe ser un número' })
-    @Expose()
-    'Número de WhatsApp de Telefónica 10105'?: number
 
     @IsOptional()
     @IsNumber({}, { message: 'Maqueta de Botmaker 10105 debe ser un número' })
