@@ -12,7 +12,7 @@ export class PageFetcherDetail {
         const originalRequest = response.request()
         const headers = originalRequest.headers()
 
-        const newResponse = await this.page.evaluate(
+        const _response = await this.page.evaluate(
             async ({ url, headers, bodyOverrides }) => {
                 // 🔹 Crear FormData desde cero
                 const formData = new FormData();
@@ -41,8 +41,6 @@ export class PageFetcherDetail {
                 }
             }
         )
-
-        console.log('🔁 Respuesta modificada:', newResponse.server);
-        return newResponse.server
+        return _response
     }
 }

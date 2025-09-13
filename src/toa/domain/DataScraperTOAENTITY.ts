@@ -1,7 +1,10 @@
-import { IsArray, IsDefined, IsNumber, IsOptional, IsString, ValidateIf, ValidateNested } from "class-validator"
+import { IsArray, IsDate, IsDefined, IsNumber, IsOptional, IsString, ValidateIf, ValidateNested } from "class-validator"
 import { CodigoDescripcionDTO } from "./CodigoDescripcionDTO"
 import { Expose, Transform, Type } from "class-transformer"
 import { TrazabilidadDelPluginDTO } from "./TrazabilidadDelPluginDTO"
+import { InventoryDTO } from "./InventoryDTO"
+import { parseCustomDate } from "../utils"
+import { ProductsServicesContractedDTO } from "./ProductsServicesContractedDTO"
 
 export class DataScraperTOAENTITY {
     @IsDefined({ message: 'Técnico es requerido' })
@@ -31,9 +34,9 @@ export class DataScraperTOAENTITY {
     'Número de Petición'?: string
 
     @IsDefined({ message: 'Fecha de Cita es requerido' })
-    @IsNumber({}, { message: 'Fecha de Cita debe ser un número' })
+    @IsDate({ message: 'Fecha de Cita debe ser una fecha' })
     @Expose()
-    'Fecha de Cita': number
+    'Fecha de Cita': Date
 
     @IsOptional()
     @ValidateIf((o) => typeof o['Time Slot'] === 'number')
@@ -44,7 +47,7 @@ export class DataScraperTOAENTITY {
     'Time Slot'?: string | number;
 
     @IsOptional()
-     @Transform(({ value }) => typeof value === 'number' ? value.toString() : value)
+    @Transform(({ value }) => typeof value === 'number' ? value.toString() : value)
     @IsString({ message: 'Localidad debe ser una cadena de texto' })
     @Expose()
     Localidad?: string
@@ -140,9 +143,10 @@ export class DataScraperTOAENTITY {
     'Primera operación manual realizada por usuario': number
 
     @IsDefined({ message: 'Fecha de Registro Legados es requerido' })
-    @IsString({ message: 'Fecha de Registro Legados debe ser una cadena de texto' })
+    @Transform(({ value }) => parseCustomDate(value))
+    @IsDate({ message: 'Fecha de Registro Legados debe ser una fecha' })
     @Expose()
-    'Fecha de Registro Legados': string
+    'Fecha de Registro Legados': Date
 
     @IsOptional()
     @IsString({ message: 'Usuario debe ser una cadena de texto' })
@@ -190,9 +194,9 @@ export class DataScraperTOAENTITY {
     'Código Cierre Cancelada'?: string
 
     @IsOptional()
-    @IsNumber({}, { message: 'Fecha Hora de Cancelación debe ser un número' })
+    @IsDate({ message: 'Fecha Hora de Cancelación debe ser una fecha' })
     @Expose()
-    'Fecha Hora de Cancelación'?: number
+    'Fecha Hora de Cancelación'?: Date
 
     @IsOptional()
     @IsString({ message: 'Empresa debe ser una cadena de texto' })
@@ -205,9 +209,9 @@ export class DataScraperTOAENTITY {
     'Bucket Inicial'?: string
 
     @IsOptional()
-    @IsNumber({}, { message: 'Fecha Registro de Actividad en TOA debe ser un número' })
+    @IsDate({ message: 'Fecha Registro de Actividad en TOA debe ser una fecha' })
     @Expose()
-    'Fecha Registro de Actividad en TOA'?: number
+    'Fecha Registro de Actividad en TOA'?: Date
 
     @IsOptional()
     @IsNumber({}, { message: 'Coordenada X dirección tap debe ser un número' })
@@ -314,9 +318,9 @@ export class DataScraperTOAENTITY {
     'Estado de Soporte de Planta 101'?: string
 
     @IsOptional()
-    @IsNumber({}, { message: 'Fecha Respuesta de Soporte de Planta 101 debe ser un número' })
+    @IsDate({ message: 'Fecha Respuesta de Soporte de Planta 101 debe ser una fecha' })
     @Expose()
-    'Fecha Respuesta de Soporte de Planta 101'?: number
+    'Fecha Respuesta de Soporte de Planta 101'?: Date
 
     @IsOptional()
     @IsString({ message: 'Observación Respuesta de Soporte de Planta 101 debe ser una cadena de texto' })
@@ -422,9 +426,9 @@ export class DataScraperTOAENTITY {
     'Usuario de agendamiento'?: string
 
     @IsOptional()
-    @IsNumber({}, { message: 'Fecha de agendamiento debe ser un número' })
+    @IsDate({ message: 'Fecha de agendamiento debe ser una fecha' })
     @Expose()
-    'Fecha de agendamiento'?: number
+    'Fecha de agendamiento'?: Date
 
     @IsOptional()
     @IsString({ message: 'Franja de agendamiento debe ser una cadena de texto' })
@@ -491,10 +495,31 @@ export class DataScraperTOAENTITY {
     @Expose()
     'REPROGRAMADO POR PRIORIDAD': string
 
-    @IsDefined({ message: 'Trazabilidad del Plugin es requerido' })
-    @Type(() => TrazabilidadDelPluginDTO)
-    @IsArray({ message: 'Trazabilidad del Plugin debe ser un arreglo' })
+    // @IsDefined({ message: 'Trazabilidad del Plugin es requerido' })
+    // @Type(() => TrazabilidadDelPluginDTO)
+    // @IsArray({ message: 'Trazabilidad del Plugin debe ser un arreglo' })
+    // @ValidateNested({ each: true })
+    // @Expose()
+    // 'Trazabilidad del Plugin': TrazabilidadDelPluginDTO[]
+
+    @IsOptional()
+    @Transform(({ value }) => value ?? [])
+    @Type(() => InventoryDTO)
+    @IsArray({ message: 'Inventory debe ser un arreglo' })
     @ValidateNested({ each: true })
     @Expose()
-    'Trazabilidad del Plugin': TrazabilidadDelPluginDTO[]
+    Inventory!: InventoryDTO[]
+
+    @IsOptional()
+    @Transform(({ value }) => value ?? [])
+    @Type(() => ProductsServicesContractedDTO)
+    @IsArray({ message: 'Inventory debe ser un arreglo' })
+    @ValidateNested({ each: true })
+    @Expose()
+    ProductsServicesContracted!: ProductsServicesContractedDTO[]
+
+    @IsDefined({ message: 'SettlementDate es requerido' })
+    @IsDate({ message: 'SettlementDate debe ser una fecha' })
+    @Expose()
+    SettlementDate!: Date
 }

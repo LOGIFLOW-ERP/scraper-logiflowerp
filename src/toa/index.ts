@@ -9,6 +9,7 @@ import {
 } from './services'
 import { ScrapingSystem } from 'logiflowerp-sdk'
 import { DataScraperTOAENTITY } from './domain'
+import { getFormattedDateRange } from './utils'
 
 export async function BootstrapTOA() {
     const mongoService = new MongoService()
@@ -52,8 +53,14 @@ export async function BootstrapTOA() {
                 const orderFetcher = new OrderDataFetcher(page)
                 const data: DataScraperTOAENTITY[] = []
 
-                for (const id of ids) {
-                    await orderFetcher.getOrderData(targetToa, id, data)
+                for (let i = 0; i <= ENV.LOOKBACK_DAYS; i++) {
+                    const fec = new Date()
+                    fec.setDate(fec.getDate() - i)
+                    const date = getFormattedDateRange(fec)
+
+                    for (const [j, id] of ids.entries()) {
+                        await orderFetcher.getOrderData(targetToa, id, data, date, ids, 0, j)
+                    }
                 }
 
                 console.log(`✅ Scraping completado para ${company.code}`)
