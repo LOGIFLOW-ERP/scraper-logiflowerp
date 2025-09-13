@@ -3,13 +3,15 @@ import { MongoService } from '../services'
 import { ENV, PUPPETEER_CONFIG } from '@/config'
 import {
     FilterSelector,
+    GroupOrdersByCompany,
     LoginService,
     OrderDataFetcher,
-    ProvidersScraper
+    ProvidersScraper,
+    SaveOrders
 } from './services'
 import { ScrapingSystem } from 'logiflowerp-sdk'
 import { DataScraperTOAENTITY } from './domain'
-import { getFormattedDateRange } from './utils'
+import { buildTOAOrdersEntity, getFormattedDateRange } from './utils'
 
 export async function BootstrapTOA() {
     const mongoService = new MongoService()
@@ -62,6 +64,10 @@ export async function BootstrapTOA() {
                         await orderFetcher.getOrderData(targetToa, id, data, date, ids, 0, j)
                     }
                 }
+
+                const entities = await buildTOAOrdersEntity(data)
+                const orderedEntities = await GroupOrdersByCompany(entities, companies, mongoService)
+                await SaveOrders(orderedEntities, mongoService)
 
                 console.log(`✅ Scraping completado para ${company.code}`)
             } catch (err) {
