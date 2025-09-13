@@ -5,6 +5,8 @@ import {
     getDataInventory,
     getDataProductsServicesContracted,
     getSettlementDate,
+    groupPlantaUbicacion,
+    parseFechaDeCita,
     parseSegmentoXml,
     parseTrazabilidadDelPluginXml,
 } from '../utils'
@@ -56,7 +58,7 @@ export class OrderDataFetcher {
         const _response = await handler.searchAndSelectItem()
 
         // 4. Validar y transformar a entidades
-        for (const [i, element] of responseJson.entries()) {
+        for (const [i, element] of responseJson.slice(0, 1).entries()) {
             try {
                 const detail = await this.fetcherDetail.fetchData(_response, {
                     pid: element['ID Recurso'],
@@ -66,7 +68,18 @@ export class OrderDataFetcher {
                 })
 
                 element.ProductsServicesContracted = getDataProductsServicesContracted(detail, element['Número OT'])
+                element['Fecha de Cita'] = parseFechaDeCita(element['Fecha de Cita'])
                 element.SettlementDate = new Date(0)
+                element._id = crypto.randomUUID()
+                element['Velocidad Internet Requerimiento'] = typeof element['Velocidad Internet Requerimiento'] === 'number'
+                    ? element['Velocidad Internet Requerimiento'].toString()
+                    : element['Velocidad Internet Requerimiento']
+                element.Amplificador = typeof element.Amplificador === 'number'
+                    ? element.Amplificador.toString()
+                    : element.Amplificador
+                element.Inventory = []
+                element['Código Cierre Cancelada'] = element['Código Cierre Cancelada'] ?? ''
+                groupPlantaUbicacion(element)
 
                 if (element['Estado actividad'] === 'Completado') {
                     element.SettlementDate = getSettlementDate(detail, element['Número OT'])
@@ -88,8 +101,8 @@ export class OrderDataFetcher {
                     console.log(element)
                     throw new Error(`❌ Validación fallida: ${message}`)
                 }
-
-                data.push(instance)
+                // console.log(instance)
+                data.push(element)
                 console.log(`Procesando ${_i}/${ENV.LOOKBACK_DAYS} dias (${date}), procesando ${j}/${ids.length} buckets, procesando ${i + 1} de ${responseJson.length} ordenes`)
             } catch (error) {
                 console.log(element)

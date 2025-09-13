@@ -1,10 +1,12 @@
-import { IsArray, IsDate, IsDefined, IsNumber, IsOptional, IsString, ValidateIf, ValidateNested } from "class-validator"
+import { IsArray, IsDate, IsDefined, IsNumber, IsObject, IsOptional, IsString, ValidateIf, ValidateNested } from "class-validator"
 import { CodigoDescripcionDTO } from "./CodigoDescripcionDTO"
 import { Expose, Transform, Type } from "class-transformer"
 import { TrazabilidadDelPluginDTO } from "./TrazabilidadDelPluginDTO"
 import { InventoryDTO } from "./InventoryDTO"
 import { parseCustomDate } from "../utils"
 import { ProductsServicesContractedDTO } from "./ProductsServicesContractedDTO"
+import { PlantaDTO } from "./PlantaDTO"
+import { UbicacionDTO } from "./UbicacionDTO"
 
 export class DataScraperTOAENTITY {
     @IsDefined({ message: 'Técnico es requerido' })
@@ -47,17 +49,6 @@ export class DataScraperTOAENTITY {
     'Time Slot'?: string | number;
 
     @IsOptional()
-    @Transform(({ value }) => typeof value === 'number' ? value.toString() : value)
-    @IsString({ message: 'Localidad debe ser una cadena de texto' })
-    @Expose()
-    Localidad?: string
-
-    @IsOptional()
-    @IsString({ message: 'Dirección debe ser una cadena de texto' })
-    @Expose()
-    Dirección?: string
-
-    @IsOptional()
     @IsNumber({}, { message: 'Direccion Polar X debe ser un número' })
     @Expose()
     'Direccion Polar X'?: number
@@ -66,16 +57,6 @@ export class DataScraperTOAENTITY {
     @IsNumber({}, { message: 'Direccion Polar Y debe ser un número' })
     @Expose()
     'Direccion Polar Y'?: number
-
-    @IsOptional()
-    @IsString({ message: 'Clave Zona de Trabajo debe ser una cadena de texto' })
-    @Expose()
-    'Clave Zona de Trabajo'?: string
-
-    @IsOptional()
-    @IsString({ message: 'Zona de Trabajo debe ser una cadena de texto' })
-    @Expose()
-    'Zona de Trabajo'?: string
 
     @IsOptional()
     @IsString({ message: 'Nombre Cliente debe ser una cadena de texto' })
@@ -188,10 +169,10 @@ export class DataScraperTOAENTITY {
     @Expose()
     'Código de Cliente'?: number
 
-    @IsOptional()
+    @IsDefined({ message: 'Código Cierre Cancelada es requerido' })
     @IsString({ message: 'Código Cierre Cancelada debe ser una cadena de texto' })
     @Expose()
-    'Código Cierre Cancelada'?: string
+    'Código Cierre Cancelada': string
 
     @IsOptional()
     @IsDate({ message: 'Fecha Hora de Cancelación debe ser una fecha' })
@@ -249,31 +230,10 @@ export class DataScraperTOAENTITY {
     'Tipo de Tecnología Legados'?: string
 
     @IsOptional()
-    @Transform(({ value }) => typeof value === 'number' ? value.toString() : value)
+    // @Transform(({ value }) => typeof value === 'number' ? value.toString() : value)
     @IsString({ message: 'Velocidad Internet Requerimiento debe ser una cadena de texto' })
     @Expose()
     'Velocidad Internet Requerimiento'?: string
-
-    @IsOptional()
-    @IsNumber({}, { message: 'Tap debe ser un número' })
-    @Expose()
-    Tap?: number
-
-    @IsOptional()
-    @Transform(({ value }) => typeof value === 'number' ? value.toString() : value)
-    @IsString({ message: 'Amplificador debe ser una cadena de texto' })
-    @Expose()
-    Amplificador?: string
-
-    @IsOptional()
-    @IsString({ message: 'Nodo debe ser una cadena de texto' })
-    @Expose()
-    Nodo?: string
-
-    @IsOptional()
-    @IsString({ message: 'Troba debe ser una cadena de texto' })
-    @Expose()
-    Troba?: string
 
     @IsDefined({ message: 'Envio de psi es requerido' })
     @IsString({ message: 'Envio de psi debe ser una cadena de texto' })
@@ -287,30 +247,15 @@ export class DataScraperTOAENTITY {
 
     @IsDefined({ message: 'Segmento es requerido' })
     @Type(() => CodigoDescripcionDTO)
-    @IsArray({ message: 'Segmento debe ser un arreglo' })
-    @ValidateNested({ each: true })
+    @IsObject({ message: "Segmento debe ser un objeto." })
+    @ValidateNested({ })
     @Expose()
-    Segmento!: CodigoDescripcionDTO[]
-
-    @IsOptional()
-    @IsString({ message: 'Estado del Borne debe ser una cadena de texto' })
-    @Expose()
-    'Estado del Borne'?: string
-
-    @IsOptional()
-    @IsString({ message: 'Rotulado del CTO debe ser una cadena de texto' })
-    @Expose()
-    'Rotulado del CTO'?: string
+    Segmento!: CodigoDescripcionDTO
 
     @IsOptional()
     @IsString({ message: 'Sistema Origen debe ser una cadena de texto' })
     @Expose()
     'Sistema Origen'?: string
-
-    @IsOptional()
-    @IsNumber({}, { message: 'Datos Borne debe ser un número' })
-    @Expose()
-    'Datos Borne'?: number
 
     @IsOptional()
     @IsString({ message: 'Estado de Soporte de Planta 101 debe ser una cadena de texto' })
@@ -374,11 +319,6 @@ export class DataScraperTOAENTITY {
     @IsString({ message: 'Nombre de Provincia debe ser un texto cuando es string' })
     @Expose()
     'Nombre de Provincia': string | number
-
-    @IsOptional()
-    @IsString({ message: 'Departamento debe ser una cadena de texto' })
-    @Expose()
-    Departamento?: string
 
     @IsOptional()
     @IsString({ message: 'Prioridad debe ser una cadena de texto' })
@@ -502,18 +442,28 @@ export class DataScraperTOAENTITY {
     // @Expose()
     // 'Trazabilidad del Plugin': TrazabilidadDelPluginDTO[]
 
-    @IsOptional()
-    @Transform(({ value }) => value ?? [])
+    @IsDefined({ message: 'Inventory es requerido' })
     @Type(() => InventoryDTO)
     @IsArray({ message: 'Inventory debe ser un arreglo' })
     @ValidateNested({ each: true })
     @Expose()
     Inventory!: InventoryDTO[]
 
-    @IsOptional()
-    @Transform(({ value }) => value ?? [])
+    @IsDefined({ message: 'Planta es requerido' })
+    @Type(() => PlantaDTO)
+    @ValidateNested()
+    @Expose()
+    Planta!: PlantaDTO
+
+    @IsDefined({ message: 'Ubicacion es requerido' })
+    @Type(() => UbicacionDTO)
+    @ValidateNested()
+    @Expose()
+    Ubicacion!: UbicacionDTO
+
+    @IsDefined({ message: 'ProductsServicesContracted es requerido' })
     @Type(() => ProductsServicesContractedDTO)
-    @IsArray({ message: 'Inventory debe ser un arreglo' })
+    @IsArray({ message: 'ProductsServicesContracted debe ser un arreglo' })
     @ValidateNested({ each: true })
     @Expose()
     ProductsServicesContracted!: ProductsServicesContractedDTO[]

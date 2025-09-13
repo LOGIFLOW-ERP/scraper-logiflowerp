@@ -5,10 +5,8 @@ export async function buildTOAOrdersEntity(data: DataScraperTOAENTITY[]) {
     const entities: TOAOrderENTITY[] = []
 
     for (const element of data) {
-        const _entity = new TOAOrderENTITY()
-        _entity.toa_resource_id = element['ID Recurso']
-        // llenar entidad
-        const entity = await validateCustom(_entity, TOAOrderENTITY, Error)
+        const _id = crypto.randomUUID()
+        const entity = await validateCustom({ ...element, _id }, TOAOrderENTITY, Error)
         entities.push(entity)
     }
 
