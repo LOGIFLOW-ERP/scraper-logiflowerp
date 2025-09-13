@@ -1,6 +1,13 @@
 import { Document, MongoClient, } from 'mongodb'
 import { ENV } from '../config'
-import { collections, db_root, EmployeeENTITY, RootCompanyENTITY, State, TOAOrderENTITY } from 'logiflowerp-sdk'
+import {
+    collections,
+    db_root,
+    RootCompanyENTITY,
+    ScrapingCredentialENTITY,
+    ScrapingSystem,
+    State
+} from 'logiflowerp-sdk'
 
 export class MongoService {
     private client: MongoClient
@@ -37,23 +44,20 @@ export class MongoService {
         return activeCompanies
     }
 
-    public async getPersonnelCompany(code: string) {
-        const personal = await this.getCollection<EmployeeENTITY>(code, collections.employee)
+    public async getScrapingCredentialTOA() {
+        const companies = await this.getCollection<ScrapingCredentialENTITY>(db_root, collections.scrapingCredential)
 
-        const query = { state: State.ACTIVO, isDeleted: false }
-        const projectFields = { _id: 1, toa_resource_id: 1 } as const
+        const query = { system: ScrapingSystem.TOA, isDeleted: false }
 
-        const dataPersonal = await personal
-            .find<EmployeeENTITY>(query)
-            .project<Pick<EmployeeENTITY, keyof typeof projectFields>>(projectFields)
+        const result = await companies
+            .find<ScrapingCredentialENTITY>(query)
             .toArray()
 
-        return dataPersonal
-    }
+        if (result.length !== 1) {
+            throw new Error(`Hay ${result.length} resultados para credencial de scraping TOA`)
+        }
 
-    public async saveTOAOrders(code: string, orders: TOAOrderENTITY[]) {
-        const toa_order = await this.getCollection<TOAOrderENTITY>(code, collections.toa_order)
-        await toa_order.insertMany(orders)
+        return result[0]
     }
 
     public async close() {
