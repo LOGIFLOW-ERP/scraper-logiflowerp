@@ -12,6 +12,10 @@ export function groupPlantaUbicacion(el: any) {
     }
     el.Planta = Planta
 
+    el.Localidad = el.Localidad && typeof el.Localidad === 'number'
+        ? el.Localidad.toString()
+        : el.Localidad
+
     const Ubicacion: UbicacionDTO = {
         Localidad: el.Localidad ?? '',
         Dirección: el.Dirección ?? '',

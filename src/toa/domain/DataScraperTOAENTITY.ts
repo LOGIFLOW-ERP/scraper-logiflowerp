@@ -1,6 +1,6 @@
 import { IsArray, IsDate, IsDefined, IsNumber, IsObject, IsOptional, IsString, ValidateIf, ValidateNested } from "class-validator"
 import { CodigoDescripcionDTO } from "./CodigoDescripcionDTO"
-import { Expose, Transform, Type } from "class-transformer"
+import { Expose, Type } from "class-transformer"
 import { TrazabilidadDelPluginDTO } from "./TrazabilidadDelPluginDTO"
 import { InventoryDTO } from "./InventoryDTO"
 import { parseCustomDate } from "../utils"
@@ -30,7 +30,6 @@ export class DataScraperTOAENTITY {
     'Subtipo de Actividad': string
 
     @IsOptional()
-    @Transform(({ value }) => typeof value === 'number' ? value.toString() : value)
     @IsString({ message: 'Número de Petición debe ser una cadena de texto' })
     @Expose()
     'Número de Petición'?: string
@@ -124,7 +123,6 @@ export class DataScraperTOAENTITY {
     'Primera operación manual realizada por usuario': number
 
     @IsDefined({ message: 'Fecha de Registro Legados es requerido' })
-    @Transform(({ value }) => parseCustomDate(value))
     @IsDate({ message: 'Fecha de Registro Legados debe ser una fecha' })
     @Expose()
     'Fecha de Registro Legados': Date
@@ -230,7 +228,6 @@ export class DataScraperTOAENTITY {
     'Tipo de Tecnología Legados'?: string
 
     @IsOptional()
-    // @Transform(({ value }) => typeof value === 'number' ? value.toString() : value)
     @IsString({ message: 'Velocidad Internet Requerimiento debe ser una cadena de texto' })
     @Expose()
     'Velocidad Internet Requerimiento'?: string
@@ -248,7 +245,7 @@ export class DataScraperTOAENTITY {
     @IsDefined({ message: 'Segmento es requerido' })
     @Type(() => CodigoDescripcionDTO)
     @IsObject({ message: "Segmento debe ser un objeto." })
-    @ValidateNested({ })
+    @ValidateNested({})
     @Expose()
     Segmento!: CodigoDescripcionDTO
 

@@ -11,12 +11,12 @@ export const parseSegmentoXml = (responseJson: any[]) => {
         const rawSegmento = element['Segmento']
 
         if (!rawSegmento || typeof rawSegmento !== 'string') {
-            element['Segmento'] = []
+            element['Segmento'] = { Codigo: '', Descripcion: '' }
             continue
         }
 
         const parsed = parser.parse(rawSegmento)
-        const Segmento = parsed?.XA_CUSTOMER_SEGMENT?.SegmentoCliente ?? []
+        const Segmento = parsed?.XA_CUSTOMER_SEGMENT?.SegmentoCliente ?? { Codigo: '', Descripcion: '' }
         element['Segmento'] = Segmento.length
             ? Segmento[0]
             : {

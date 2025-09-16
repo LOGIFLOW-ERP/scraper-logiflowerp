@@ -1,6 +1,7 @@
 import { get } from "env-var";
 
 export const ENV = Object.freeze({
+    HOST_API: get("HOST_API").required().asUrlString(),
     MONGO_URI: get("MONGO_URI").required().asUrlString(),
     EMAIL_USER: get('EMAIL_USER').required().asEmailString(),
     EMAIL_PASS: get('EMAIL_PASS').required().asString(),
@@ -12,4 +13,5 @@ export const ENV = Object.freeze({
     TOA_EXECUTION_HOUR: get('TOA_EXECUTION_HOUR').required().asIntPositive(),
     TOA_EXECUTION_TMINUTE: get('TOA_EXECUTION_TMINUTE').required().asIntPositive(),
     LOOKBACK_DAYS: get('LOOKBACK_DAYS').required().asIntPositive(),
+    TOKEN: get('TOKEN').required().asString(),
 })

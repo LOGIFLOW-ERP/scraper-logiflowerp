@@ -6,6 +6,7 @@ import {
     getDataProductsServicesContracted,
     getSettlementDate,
     groupPlantaUbicacion,
+    parseCustomDate,
     parseFechaDeCita,
     parseSegmentoXml,
     parseTrazabilidadDelPluginXml,
@@ -13,7 +14,7 @@ import {
 import { plainToInstance } from 'class-transformer'
 import { validate } from 'class-validator'
 import { DataScraperTOAENTITY } from '../domain'
-import { ScrapingCredentialDTO } from 'logiflowerp-sdk'
+import { RequestNumberTTLENTITY, ScrapingCredentialDTO } from 'logiflowerp-sdk'
 import { PageFetcherCSV } from './PageFetcherCSV'
 import { PageFetcherDetail } from './PageFetcherDetail'
 import { SearchPageHandler } from './SearchPageHandler'
@@ -32,6 +33,7 @@ export class OrderDataFetcher {
 
     public async getOrderData(
         targetToa: ScrapingCredentialDTO,
+        mapaRequestNumber: Set<string>,
         providerId: string,
         data: DataScraperTOAENTITY[],
         date: string,
@@ -57,9 +59,23 @@ export class OrderDataFetcher {
         const handler = new SearchPageHandler(this.page, targetToa)
         const _response = await handler.searchAndSelectItem()
 
+        // console.log(responseJson.filter(e => e['Número de Petición'] === 'FE-1100664165'))
+
         // 4. Validar y transformar a entidades
-        for (const [i, element] of responseJson.slice(0, 1).entries()) {
+        for (const [i, element] of responseJson.slice(0, 200).entries()) {
             try {
+                if (element['Número de Petición'] === undefined) {
+                    continue
+                }
+
+                element['Número de Petición'] = typeof element['Número de Petición'] === 'number'
+                    ? element['Número de Petición'].toString()
+                    : element['Número de Petición']
+
+                if (mapaRequestNumber.has(element['Número de Petición'])) {
+                    continue
+                }
+
                 const detail = await this.fetcherDetail.fetchData(_response, {
                     pid: element['ID Recurso'],
                     u: targetToa.userName,
@@ -71,6 +87,7 @@ export class OrderDataFetcher {
                 element['Fecha de Cita'] = parseFechaDeCita(element['Fecha de Cita'])
                 element.SettlementDate = new Date(0)
                 element._id = crypto.randomUUID()
+                element.isDeleted = false
                 element['Velocidad Internet Requerimiento'] = typeof element['Velocidad Internet Requerimiento'] === 'number'
                     ? element['Velocidad Internet Requerimiento'].toString()
                     : element['Velocidad Internet Requerimiento']
@@ -79,6 +96,17 @@ export class OrderDataFetcher {
                     : element.Amplificador
                 element.Inventory = []
                 element['Código Cierre Cancelada'] = element['Código Cierre Cancelada'] ?? ''
+                element['Nombre Cliente'] = element['Nombre Cliente'] ?? ''
+                element['Habilidad del trabajo'] = element['Habilidad del trabajo'] ?? ''
+                element['Tecnología Voz'] = element['Tecnología Voz'] ?? ''
+                element['Tipo de Tecnología Legados'] = element['Tipo de Tecnología Legados'] ?? ''
+                element['Velocidad Internet Requerimiento'] = element['Velocidad Internet Requerimiento'] ?? ''
+                element['Orden Pangea'] = element['Orden Pangea'] ?? ''
+                element['Tecnología TV'] = element['Tecnología TV'] ?? ''
+                element['Número Teléfono'] = element['Número Teléfono'] ?? 0
+                element['AccessID'] = element['AccessID'] ?? 0
+                element['Fecha de Registro Legados'] = parseCustomDate(element['Fecha de Registro Legados'])
+
                 groupPlantaUbicacion(element)
 
                 if (element['Estado actividad'] === 'Completado') {
@@ -98,10 +126,9 @@ export class OrderDataFetcher {
 
                 if (errors.length > 0) {
                     const message = formatErrors(errors)
-                    console.log(element)
                     throw new Error(`❌ Validación fallida: ${message}`)
                 }
-                // console.log(instance)
+
                 data.push(element)
                 console.log(`Procesando ${_i}/${ENV.LOOKBACK_DAYS} dias (${date}), procesando ${j}/${ids.length} buckets, procesando ${i + 1} de ${responseJson.length} ordenes`)
             } catch (error) {

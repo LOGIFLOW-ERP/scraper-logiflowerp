@@ -1,9 +1,8 @@
-import { Expose, Transform } from "class-transformer"
+import { Expose } from "class-transformer"
 import { IsDefined, IsString } from "class-validator"
 
 export class UbicacionDTO {
     @IsDefined({ message: 'Localidad es requerido' })
-    @Transform(({ value }) => typeof value === 'number' ? value.toString() : value)
     @IsString({ message: 'Localidad debe ser una cadena de texto' })
     @Expose()
     Localidad!: string

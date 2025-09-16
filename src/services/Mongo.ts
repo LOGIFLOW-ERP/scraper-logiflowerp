@@ -3,6 +3,7 @@ import { ENV } from '../config'
 import {
     collections,
     db_root,
+    RequestNumberTTLENTITY,
     RootCompanyENTITY,
     ScrapingCredentialENTITY,
     ScrapingSystem,
@@ -30,7 +31,6 @@ export class MongoService {
         return db.collection<T>(collectionName)
     }
 
-
     public async getActiveCompanies() {
         const companies = await this.getCollection<RootCompanyENTITY>(db_root, collections.company)
 
@@ -42,6 +42,11 @@ export class MongoService {
             .project<Pick<RootCompanyENTITY, keyof typeof projectFields>>(projectFields)
             .toArray()
         return activeCompanies
+    }
+
+    public async getRequestNumberTTL() {
+        const collection = await this.getCollection<RequestNumberTTLENTITY>(db_root, collections.requestNumberTTL)
+        return collection.find().toArray()
     }
 
     public async getScrapingCredentialTOA() {

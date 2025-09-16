@@ -6,16 +6,24 @@ import {
     LoginService,
     OrderDataFetcher,
     ProvidersScraper,
+    SendData,
 } from './services'
 import { DataScraperTOAENTITY } from './domain'
 import { buildTOAOrdersEntity, getFormattedDateRange } from './utils'
 
 export async function BootstrapTOA() {
     const mongoService = new MongoService()
-    let targetToa
 
+    let targetToa
     try {
         targetToa = await mongoService.getScrapingCredentialTOA()
+    } finally {
+        await mongoService.close()
+    }
+
+    let requestNumberTTL
+    try {
+        requestNumberTTL = await mongoService.getRequestNumberTTL()
     } finally {
         await mongoService.close()
     }
@@ -40,7 +48,7 @@ export async function BootstrapTOA() {
             await scraper.getProvidersId(ids)
 
             const orderFetcher = new OrderDataFetcher(page)
-            const data: DataScraperTOAENTITY[] = []
+            const mapaRequestNumber = new Set(requestNumberTTL.map(e => e.numero_de_peticion))
 
             for (let i = 0; i <= ENV.LOOKBACK_DAYS; i++) {
                 const fec = new Date()
@@ -48,22 +56,12 @@ export async function BootstrapTOA() {
                 const date = getFormattedDateRange(fec)
 
                 for (const [j, id] of ids.entries()) {
-                    await orderFetcher.getOrderData(targetToa, id, data, date, ids, 0, j)
+                    const data: DataScraperTOAENTITY[] = []
+                    await orderFetcher.getOrderData(targetToa, mapaRequestNumber, id, data, date, ids, i, j + 1)
+                    await buildTOAOrdersEntity(data)
+                    await new SendData().exec(data)
                 }
             }
-
-            await buildTOAOrdersEntity(data)
-
-            const url = 'http://localhost:3003/api/root/processes/toaorder/save'
-            const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6IjIxMjEwOGU4LThmMTItNDZjZS05MmRhLTA0MjVlMDU0ODMxZSIsImlkZW50aXR5IjoiNzA0NjA0ODUiLCJkb2N1bWVudFR5cGUiOiJETkkiLCJuYW1lcyI6IkFudG9uaW8gQW1hZG8iLCJzdXJuYW1lcyI6Ik1lamlhIENhcnJpbGxvIiwiY291bnRyeSI6IlBFUiIsImVtYWlsIjoiYW50b25pby5tZWppYUBsb2dpZmxvd2VycC5jb20iLCJyb290IjpmYWxzZX0sInByb2ZpbGUiOnsiX2lkIjoiIiwibmFtZSI6IiIsInN5c3RlbU9wdGlvbnMiOltdfSwicGVyc29ubmVsIjp7Il9pZHByb2ZpbGUiOiIiLCJlbWFpbCI6IiJ9LCJyb290Q29tcGFueSI6eyJjb2RlIjoiTE9HSUZMT1ciLCJydWMiOiIiLCJjb21wYW55bmFtZSI6IiIsImNvdW50cnkiOiIifSwiaWF0IjoxNzU3NzgxNzA2LCJleHAiOjE3NTc4MjQ5MDZ9.gZVWgw8U5gLfv8kRdnIeUCTuJF79yVoILejySRJIwxI'
-            await fetch(url, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",      // Indicamos que es JSON
-                    "Authorization": `Bearer ${token}`       // Bearer token
-                },
-                body: JSON.stringify({ data })
-            })
 
             console.log(`✅ Scraping TOA completado`)
         } catch (err) {

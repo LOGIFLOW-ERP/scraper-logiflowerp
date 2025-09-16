@@ -1,5 +1,6 @@
 import { Expose } from "class-transformer";
-import { IsDefined, IsIn, IsNotEmpty, IsNumber, IsString, Min } from "class-validator";
+import { IsDefined, IsEnum, IsIn, IsNotEmpty, IsNumber, IsString, Min } from "class-validator";
+import { StateInventory } from "logiflowerp-sdk";
 
 export class InventoryDTO {
     @IsDefined({ message: 'code es requerido' })
@@ -40,4 +41,9 @@ export class InventoryDTO {
     @IsIn(['deinstall', 'install'])
     @Expose()
     invpool!: 'deinstall' | 'install';
+
+    @Expose()
+    @IsDefined({ message: "El campo Estado es obligatorio." })
+    @IsEnum(StateInventory, { message: "El campo Estado debe ser uno de: PENDIENTE, PROCESADO." })
+    State!: StateInventory
 }

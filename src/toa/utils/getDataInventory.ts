@@ -1,3 +1,4 @@
+import { StateInventory } from "logiflowerp-sdk";
 import { InventoryDTO } from "../domain/InventoryDTO";
 
 export function getDataInventory(params: any, inv_aid: number) {
@@ -26,7 +27,8 @@ export function getDataInventory(params: any, inv_aid: number) {
                     quantity,
                     invsn,
                     invtype,
-                    invpool
+                    invpool,
+                    State: StateInventory.PENDIENTE
                 }
             )
         }
