@@ -1,4 +1,4 @@
-import { Expose, Transform } from "class-transformer"
+import { Expose } from "class-transformer"
 import { IsDefined, IsNumber, IsString } from "class-validator"
 
 export class PlantaDTO {
@@ -8,7 +8,6 @@ export class PlantaDTO {
     Tap!: number
 
     @IsDefined({ message: 'Amplificador es requerido' })
-    // @Transform(({ value }) => typeof value === 'number' ? value.toString() : value)
     @IsString({ message: 'Amplificador debe ser una cadena de texto' })
     @Expose()
     Amplificador!: string

@@ -2,9 +2,6 @@ import { Page } from 'puppeteer-core'
 import {
     convertExcelBytesToJson,
     formatErrors,
-    getDataInventory,
-    getDataProductsServicesContracted,
-    getSettlementDate,
     groupPlantaUbicacion,
     parseCustomDate,
     parseFechaDeCita,
@@ -14,21 +11,17 @@ import {
 import { plainToInstance } from 'class-transformer'
 import { validate } from 'class-validator'
 import { DataScraperTOAENTITY } from '../domain'
-import { RequestNumberTTLENTITY, ScrapingCredentialDTO } from 'logiflowerp-sdk'
+import { ScrapingCredentialDTO } from 'logiflowerp-sdk'
 import { PageFetcherCSV } from './PageFetcherCSV'
-import { PageFetcherDetail } from './PageFetcherDetail'
-import { SearchPageHandler } from './SearchPageHandler'
 import { ENV } from '@/config'
 
 export class OrderDataFetcher {
     private page: Page
     private fetcherCSV: PageFetcherCSV
-    private fetcherDetail: PageFetcherDetail
 
     constructor(page: Page) {
         this.page = page
         this.fetcherCSV = new PageFetcherCSV(page)
-        this.fetcherDetail = new PageFetcherDetail(page)
     }
 
     public async getOrderData(
@@ -37,9 +30,9 @@ export class OrderDataFetcher {
         providerId: string,
         data: DataScraperTOAENTITY[],
         date: string,
-        ids: string[],
         _i: number,
         j: number,
+        ids: number
     ) {
         console.log(`⌛ Obteniendo ordenes (providerId: ${providerId})...`)
 
@@ -56,13 +49,8 @@ export class OrderDataFetcher {
         parseSegmentoXml(responseJson)
         parseTrazabilidadDelPluginXml(responseJson)
 
-        const handler = new SearchPageHandler(this.page, targetToa)
-        const _response = await handler.searchAndSelectItem()
-
-        // console.log(responseJson.filter(e => e['Número de Petición'] === 'FE-1100664165'))
-
         // 4. Validar y transformar a entidades
-        for (const [i, element] of responseJson.slice(0, 200).entries()) {
+        for (const [i, element] of responseJson.entries()) {
             try {
                 if (element['Número de Petición'] === undefined) {
                     continue
@@ -76,24 +64,21 @@ export class OrderDataFetcher {
                     continue
                 }
 
-                const detail = await this.fetcherDetail.fetchData(_response, {
-                    pid: element['ID Recurso'],
-                    u: targetToa.userName,
-                    requestedAid: element['Número OT'],
-                    date
-                })
-
-                element.ProductsServicesContracted = getDataProductsServicesContracted(detail, element['Número OT'])
+                element.ProductsServicesContracted = []
                 element['Fecha de Cita'] = parseFechaDeCita(element['Fecha de Cita'])
                 element.SettlementDate = new Date(0)
                 element._id = crypto.randomUUID()
                 element.isDeleted = false
+                element.date = date
                 element['Velocidad Internet Requerimiento'] = typeof element['Velocidad Internet Requerimiento'] === 'number'
                     ? element['Velocidad Internet Requerimiento'].toString()
                     : element['Velocidad Internet Requerimiento']
                 element.Amplificador = typeof element.Amplificador === 'number'
                     ? element.Amplificador.toString()
                     : element.Amplificador
+                element['Observaciones en Legados'] = typeof element['Observaciones en Legados'] === 'number'
+                    ? element['Observaciones en Legados'].toString()
+                    : element['Observaciones en Legados']
                 element.Inventory = []
                 element['Código Cierre Cancelada'] = element['Código Cierre Cancelada'] ?? ''
                 element['Nombre Cliente'] = element['Nombre Cliente'] ?? ''
@@ -108,11 +93,6 @@ export class OrderDataFetcher {
                 element['Fecha de Registro Legados'] = parseCustomDate(element['Fecha de Registro Legados'])
 
                 groupPlantaUbicacion(element)
-
-                if (element['Estado actividad'] === 'Completado') {
-                    element.SettlementDate = getSettlementDate(detail, element['Número OT'])
-                    element.Inventory = getDataInventory(detail, element['Número OT'])
-                }
 
                 const instance = plainToInstance(
                     DataScraperTOAENTITY,
@@ -130,13 +110,18 @@ export class OrderDataFetcher {
                 }
 
                 data.push(element)
-                console.log(`Procesando ${_i}/${ENV.LOOKBACK_DAYS} dias (${date}), procesando ${j}/${ids.length} buckets, procesando ${i + 1} de ${responseJson.length} ordenes`)
+                console.log(`Procesando ${_i}/${ENV.LOOKBACK_DAYS} dias (${element.date}), procesando ${j + 1}/${ids} buckets, procesando ${i + 1} de ${responseJson.length} ordenes`)
             } catch (error) {
                 console.log(element)
                 throw error
             }
         }
 
-        console.log(`✅ Se descargaron ${data.length} ordenes (providerId: ${providerId}).`)
+        console.log(`✅ Se descargaron ${data.length} ordenes.`)
+        await this.wait(500)
+    }
+
+    private async wait(ms: number) {
+        return new Promise((resolve) => setTimeout(resolve, ms))
     }
 }

@@ -1,6 +1,7 @@
 import * as cheerio from 'cheerio'
+import { ProductsServicesContractedDTO } from '../domain'
 
-export function getDataProductsServicesContracted(params: any, inv_aid: number) {
+export function getDataProductsServicesContracted(params: any, inv_aid: number): ProductsServicesContractedDTO[] {
 
     for (const key in params.delta.Activity) {
         if (key === inv_aid.toString()) {
@@ -39,7 +40,7 @@ export function getDataProductsServicesContracted(params: any, inv_aid: number) 
                 data.push(rowData)
             })
 
-            return data
+            return data as any
         }
     }
     return []

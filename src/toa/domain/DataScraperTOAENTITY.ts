@@ -469,4 +469,9 @@ export class DataScraperTOAENTITY {
     @IsDate({ message: 'SettlementDate debe ser una fecha' })
     @Expose()
     SettlementDate!: Date
+    
+    @IsDefined({ message: 'date es requerido' })
+    @IsString()
+    @Expose()
+    date!: string
 }

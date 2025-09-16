@@ -5,11 +5,12 @@ import {
     FilterSelector,
     LoginService,
     OrderDataFetcher,
+    OrderDetailDataFetcher,
     ProvidersScraper,
     SendData,
 } from './services'
 import { DataScraperTOAENTITY } from './domain'
-import { buildTOAOrdersEntity, getFormattedDateRange } from './utils'
+import { getFormattedDateRange } from './utils'
 
 export async function BootstrapTOA() {
     const mongoService = new MongoService()
@@ -49,6 +50,7 @@ export async function BootstrapTOA() {
 
             const orderFetcher = new OrderDataFetcher(page)
             const mapaRequestNumber = new Set(requestNumberTTL.map(e => e.numero_de_peticion))
+            const data: DataScraperTOAENTITY[] = []
 
             for (let i = 0; i <= ENV.LOOKBACK_DAYS; i++) {
                 const fec = new Date()
@@ -56,12 +58,14 @@ export async function BootstrapTOA() {
                 const date = getFormattedDateRange(fec)
 
                 for (const [j, id] of ids.entries()) {
-                    const data: DataScraperTOAENTITY[] = []
-                    await orderFetcher.getOrderData(targetToa, mapaRequestNumber, id, data, date, ids, i, j + 1)
-                    await buildTOAOrdersEntity(data)
-                    await new SendData().exec(data)
+                    await orderFetcher.getOrderData(targetToa, mapaRequestNumber, id, data, date, i, j, ids.length)
                 }
             }
+
+            const orderDetailFetcher = new OrderDetailDataFetcher(page)
+            await orderDetailFetcher.getOrderData(targetToa, data,)
+
+            await new SendData().exec(data)
 
             console.log(`✅ Scraping TOA completado`)
         } catch (err) {
