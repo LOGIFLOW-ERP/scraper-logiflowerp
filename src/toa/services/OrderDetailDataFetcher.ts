@@ -37,7 +37,7 @@ export class OrderDetailDataFetcher {
     }
 
     private async helper(_response: HTTPResponse, element: DataScraperTOAENTITY, targetToa: ScrapingCredentialDTO) {
-        await this.wait(100)
+        await this.wait(50)
 
         const detail = await this.fetcherDetail.fetchData(_response, {
             pid: element['ID Recurso'],
@@ -47,9 +47,11 @@ export class OrderDetailDataFetcher {
         })
 
         element.ProductsServicesContracted = getDataProductsServicesContracted(detail, element['Número OT'])
+        element.last_update_date = getSettlementDate(detail, element['Número OT'], 'last_update_date')
 
         if (element['Estado actividad'] === 'Completado') {
-            element.SettlementDate = getSettlementDate(detail, element['Número OT'])
+            element.SettlementDate = getSettlementDate(detail, element['Número OT'], 'activity_end_time')
+            element.StartDate = getSettlementDate(detail, element['Número OT'], 'activity_start_time')
             element.Inventory = getDataInventory(detail, element['Número OT'])
         }
 

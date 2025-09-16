@@ -27,6 +27,7 @@ export class OrderDataFetcher {
     public async getOrderData(
         targetToa: ScrapingCredentialDTO,
         mapaRequestNumber: Set<string>,
+        mapaEmployees: Set<number>,
         providerId: string,
         data: DataScraperTOAENTITY[],
         date: string,
@@ -64,9 +65,14 @@ export class OrderDataFetcher {
                     continue
                 }
 
+                if (!mapaEmployees.has(element['ID Recurso'])) {
+                    continue
+                }
+
                 element.ProductsServicesContracted = []
                 element['Fecha de Cita'] = parseFechaDeCita(element['Fecha de Cita'])
                 element.SettlementDate = new Date(0)
+                element.StartDate = new Date(0)
                 element._id = crypto.randomUUID()
                 element.isDeleted = false
                 element.date = date
@@ -91,6 +97,7 @@ export class OrderDataFetcher {
                 element['Número Teléfono'] = element['Número Teléfono'] ?? 0
                 element['AccessID'] = element['AccessID'] ?? 0
                 element['Fecha de Registro Legados'] = parseCustomDate(element['Fecha de Registro Legados'])
+                element['last_update_date'] = new Date(0)
 
                 groupPlantaUbicacion(element)
 

@@ -469,6 +469,16 @@ export class DataScraperTOAENTITY {
     @IsDate({ message: 'SettlementDate debe ser una fecha' })
     @Expose()
     SettlementDate!: Date
+
+    @IsDefined({ message: 'StartDate es requerido' })
+    @IsDate({ message: 'StartDate debe ser una fecha' })
+    @Expose()
+    StartDate!: Date
+
+    @IsDefined({ message: 'last_update_date es requerido' })
+    @IsDate({ message: 'last_update_date debe ser una fecha' })
+    @Expose()
+    last_update_date!: Date // Sirve para comparar si hay varias ordenes quien es el ultimo
     
     @IsDefined({ message: 'date es requerido' })
     @IsString()

@@ -3,12 +3,15 @@ import { ENV } from '../config'
 import {
     collections,
     db_root,
+    EmployeeENTITY,
     RequestNumberTTLENTITY,
     RootCompanyENTITY,
     ScrapingCredentialENTITY,
     ScrapingSystem,
     State
 } from 'logiflowerp-sdk'
+
+const projectFields = { _id: 1, code: 1, scrapingTargets: 1 } as const
 
 export class MongoService {
     private client: MongoClient
@@ -35,13 +38,23 @@ export class MongoService {
         const companies = await this.getCollection<RootCompanyENTITY>(db_root, collections.company)
 
         const query = { state: State.ACTIVO, isDeleted: false }
-        const projectFields = { _id: 1, code: 1, scrapingTargets: 1 } as const
 
         const activeCompanies = await companies
             .find<RootCompanyENTITY>(query)
             .project<Pick<RootCompanyENTITY, keyof typeof projectFields>>(projectFields)
             .toArray()
         return activeCompanies
+    }
+
+    public async getPersonelCompanies(companies: Pick<RootCompanyENTITY, keyof typeof projectFields>[]) {
+        const dataEmployees: EmployeeENTITY[] = []
+        const query = { state: State.ACTIVO, isDeleted: false }
+        for (const element of companies) {
+            const col = await this.getCollection<EmployeeENTITY>(element.code, collections.employee)
+            const result = await col.find(query).toArray()
+            dataEmployees.push(...result)
+        }
+        return dataEmployees
     }
 
     public async getRequestNumberTTL() {

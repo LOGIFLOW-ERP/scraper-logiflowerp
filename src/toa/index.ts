@@ -10,7 +10,7 @@ import {
     SendData,
 } from './services'
 import { DataScraperTOAENTITY } from './domain'
-import { getFormattedDateRange } from './utils'
+import { findAndRemoveDuplicates, getFormattedDateRange } from './utils'
 
 export async function BootstrapTOA() {
     const mongoService = new MongoService()
@@ -28,6 +28,22 @@ export async function BootstrapTOA() {
     } finally {
         await mongoService.close()
     }
+
+    let companies
+    try {
+        companies = await mongoService.getActiveCompanies()
+    } finally {
+        await mongoService.close()
+    }
+
+    let employees
+    try {
+        employees = await mongoService.getPersonelCompanies(companies)
+    } finally {
+        await mongoService.close()
+    }
+
+    const mapaEmployees = new Set(employees.map(e => e.toa_resource_id))
 
     let browser: Browser | null = null
 
@@ -58,14 +74,26 @@ export async function BootstrapTOA() {
                 const date = getFormattedDateRange(fec)
 
                 for (const [j, id] of ids.entries()) {
-                    await orderFetcher.getOrderData(targetToa, mapaRequestNumber, id, data, date, i, j, ids.length)
+                    await orderFetcher.getOrderData(
+                        targetToa,
+                        mapaRequestNumber,
+                        mapaEmployees,
+                        id,
+                        data,
+                        date,
+                        i,
+                        j,
+                        ids.length
+                    )
                 }
             }
 
             const orderDetailFetcher = new OrderDetailDataFetcher(page)
-            await orderDetailFetcher.getOrderData(targetToa, data,)
+            await orderDetailFetcher.getOrderData(targetToa, data)
 
-            await new SendData().exec(data)
+            const _data = findAndRemoveDuplicates(data)
+
+            await new SendData().exec(_data)
 
             console.log(`✅ Scraping TOA completado`)
         } catch (err) {
