@@ -8,5 +8,8 @@ export function getSettlementDate(params: any, inv_aid: number, _key: string): D
             return parseDateTimeSettlementDate(result)
         }
     }
-    throw new Error('No hay fecha')
+    if (_key === 'last_update_date') {
+        return new Date(0)
+    }
+    throw new Error(`No hay fecha ${_key}`)
 }

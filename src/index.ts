@@ -1,27 +1,16 @@
 import 'reflect-metadata/lite'
-import cron from "node-cron";
-import { BootstrapTOA } from "./toa";
-import { ENV } from './config';
+import { BootstrapTOA } from './toa'
+import express from 'express'
+import { styleText } from 'util'
 
-async function startScheduler() {
-    try {
-        cron.schedule(`${ENV.TOA_EXECUTION_TMINUTE} ${ENV.TOA_EXECUTION_HOUR} * * *`, async () => {
-            try {
-                await BootstrapTOA()
-            } catch (error) {
-                console.error(error)
-                // Send Mail
-            }
-        })
+const app = express()
+const port = 3000
 
-        if (ENV.NODE_ENV === 'development') {
-            await BootstrapTOA()
-        }
+app.post('/toa', (req, res) => {
+    BootstrapTOA()
+    res.sendStatus(204)
+})
 
-        console.log(`✅ Jobs programados con cron`)
-    } catch (error) {
-        console.error(error);
-    }
-}
-
-startScheduler();
+app.listen(port, () => {
+    console.log(styleText('blue', `:) Scraper app listening on port ${port}`))
+})
