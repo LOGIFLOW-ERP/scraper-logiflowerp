@@ -97,6 +97,7 @@ export async function BootstrapTOA() {
                 await new SendData().exec(_data)
 
                 console.log(`✅ Scraping TOA completado`)
+                // Enviar webhook para iniciar resumen siempre y cuando sean menos de 10pm
             } finally {
                 if (ENV.NODE_ENV !== 'development') {
                     await context.close()
