@@ -7,8 +7,8 @@ export class MailService {
     private readonly env
 
     constructor() {
-        this.transporter = this.createTransporter()
         this.env = ENV
+        this.transporter = this.createTransporter()
     }
 
     private createTransporter() {

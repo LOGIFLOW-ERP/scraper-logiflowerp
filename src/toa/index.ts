@@ -13,6 +13,7 @@ import { DataScraperTOAENTITY } from './domain'
 import { findAndRemoveDuplicates, getFormattedDateRange } from './utils'
 
 export async function BootstrapTOA() {
+    console.info(`🚀 Inicio scraper TOA...`)
     try {
         const mongoService = new MongoService()
 
@@ -98,6 +99,15 @@ export async function BootstrapTOA() {
 
                 console.log(`✅ Scraping TOA completado`)
                 // Enviar webhook para iniciar resumen siempre y cuando sean menos de 10pm
+
+                //#region WebHook
+                const url = `${ENV.HOST_API}/processes/toaorder/update-consumed`
+                const response = await fetch(url, { method: 'POST', headers: { 'Authorization': `Bearer ${ENV.TOKEN}` } })
+                if (!response.ok) {
+                    const errorText = await response.text()
+                    throw new Error(`Error ${response.status}: ${errorText}`)
+                }
+                //#endregion WebHook
             } finally {
                 if (ENV.NODE_ENV !== 'development') {
                     await context.close()
@@ -110,6 +120,7 @@ export async function BootstrapTOA() {
         }
     } catch (error) {
         try {
+            console.error(error)
             const instance = new MailService()
             await instance.send(ENV.DEVS_EMAILS, 'Error en scraper TOA', (error as Error).message)
         } catch (error) {
