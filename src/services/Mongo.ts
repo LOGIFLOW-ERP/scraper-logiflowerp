@@ -1,46 +1,85 @@
-import { Document, MongoClient, } from "mongodb";
-import { ENV } from "../config";
-import { collections, db_root, RootCompanyENTITY, State } from "logiflowerp-sdk";
+import { Document, MongoClient, } from 'mongodb'
+import { ENV } from '../config'
+import {
+    collections,
+    db_root,
+    EmployeeENTITY,
+    RequestNumberTTLENTITY,
+    RootCompanyENTITY,
+    ScrapingCredentialENTITY,
+    ScrapingSystem,
+    State
+} from 'logiflowerp-sdk'
+
+const projectFields = { _id: 1, code: 1, scrapingTargets: 1 } as const
 
 export class MongoService {
-    private client: MongoClient;
-    private isConnected = false;
+    private client: MongoClient
+    private isConnected = false
 
     constructor() {
-        this.client = new MongoClient(ENV.MONGO_URI);
+        this.client = new MongoClient(ENV.MONGO_URI)
     }
 
     private async connect() {
         if (!this.isConnected) {
-            await this.client.connect();
-            this.isConnected = true;
+            await this.client.connect()
+            this.isConnected = true
         }
     }
 
     private async getCollection<T extends Document>(dbName: string, collectionName: string) {
-        await this.connect();
-        const db = this.client.db(dbName);
-        return db.collection<T>(collectionName);
+        await this.connect()
+        const db = this.client.db(dbName)
+        return db.collection<T>(collectionName)
     }
 
-
     public async getActiveCompanies() {
-        const companies = await this.getCollection<RootCompanyENTITY>(db_root, collections.company);
+        const companies = await this.getCollection<RootCompanyENTITY>(db_root, collections.company)
 
-        const query = { state: State.ACTIVO, isDeleted: false };
-        const projectFields = { _id: 1, code: 1, scrapingTargets: 1 } as const;
+        const query = { state: State.ACTIVO, isDeleted: false }
 
         const activeCompanies = await companies
             .find<RootCompanyENTITY>(query)
             .project<Pick<RootCompanyENTITY, keyof typeof projectFields>>(projectFields)
-            .toArray();
-        return activeCompanies;
+            .toArray()
+        return activeCompanies
     }
 
-    // va ver otros metodos para escribir en otras dbs y otras colecciones
+    public async getPersonelCompanies(companies: Pick<RootCompanyENTITY, keyof typeof projectFields>[]) {
+        const dataEmployees: EmployeeENTITY[] = []
+        const query = { state: State.ACTIVO, isDeleted: false }
+        for (const element of companies) {
+            const col = await this.getCollection<EmployeeENTITY>(element.code, collections.employee)
+            const result = await col.find(query).toArray()
+            dataEmployees.push(...result)
+        }
+        return dataEmployees
+    }
+
+    public async getRequestNumberTTL() {
+        const collection = await this.getCollection<RequestNumberTTLENTITY>(db_root, collections.requestNumberTTL)
+        return collection.find().toArray()
+    }
+
+    public async getScrapingCredentialTOA() {
+        const companies = await this.getCollection<ScrapingCredentialENTITY>(db_root, collections.scrapingCredential)
+
+        const query = { system: ScrapingSystem.TOA, isDeleted: false }
+
+        const result = await companies
+            .find<ScrapingCredentialENTITY>(query)
+            .toArray()
+
+        if (result.length !== 1) {
+            throw new Error(`Hay ${result.length} resultados para credencial de scraping TOA`)
+        }
+
+        return result[0]
+    }
 
     public async close() {
-        await this.client.close();
-        this.isConnected = false;
+        await this.client.close()
+        this.isConnected = false
     }
 }

@@ -7,8 +7,8 @@ export class MailService {
     private readonly env
 
     constructor() {
-        this.transporter = this.createTransporter()
         this.env = ENV
+        this.transporter = this.createTransporter()
     }
 
     private createTransporter() {
@@ -26,8 +26,8 @@ export class MailService {
     async send(
         recipients: string | string[],
         subject: string,
-        plaintextMessage: string | Buffer<ArrayBufferLike> | undefined,
-        HTMLMessage: string | Buffer<ArrayBufferLike> | undefined
+        plaintextMessage?: string | Buffer<ArrayBufferLike>,
+        HTMLMessage?: string | Buffer<ArrayBufferLike>
     ) {
         try {
             const info = await this.transporter.sendMail({

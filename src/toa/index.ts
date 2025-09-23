@@ -1,53 +1,130 @@
 import { Browser, launch } from 'puppeteer-core'
-import { MongoService } from '../services'
-import { PUPPETEER_CONFIG } from '@/config'
-import { LoginService } from './services'
-import { ScrapingSystem } from 'logiflowerp-sdk'
+import { MailService, MongoService } from '../services'
+import { ENV, PUPPETEER_CONFIG } from '@/config'
+import {
+    FilterSelector,
+    LoginService,
+    OrderDataFetcher,
+    OrderDetailDataFetcher,
+    ProvidersScraper,
+    SendData,
+} from './services'
+import { DataScraperTOAENTITY } from './domain'
+import { findAndRemoveDuplicates, getFormattedDateRange } from './utils'
 
 export async function BootstrapTOA() {
-    const mongoService = new MongoService()
-    let companies
-
+    console.info(`🚀 Inicio scraper TOA...`)
     try {
-        companies = await mongoService.getActiveCompanies()
-    } finally {
-        await mongoService.close()
-    }
+        const mongoService = new MongoService()
 
-    let browser: Browser | null = null
+        let targetToa
+        try {
+            targetToa = await mongoService.getScrapingCredentialTOA()
+        } finally {
+            await mongoService.close()
+        }
 
-    try {
-        browser = await launch(PUPPETEER_CONFIG)
+        let requestNumberTTL
+        try {
+            requestNumberTTL = await mongoService.getRequestNumberTTL()
+        } finally {
+            await mongoService.close()
+        }
 
-        for (const company of companies) {
+        let companies
+        try {
+            companies = await mongoService.getActiveCompanies()
+        } finally {
+            await mongoService.close()
+        }
+
+        let employees
+        try {
+            employees = await mongoService.getPersonelCompanies(companies)
+        } finally {
+            await mongoService.close()
+        }
+
+        const mapaEmployees = new Set(employees.map(e => e.toa_resource_id))
+
+        let browser: Browser | null = null
+
+        try {
+            browser = await launch(PUPPETEER_CONFIG)
+
             const context = await browser.createBrowserContext()
             const page = await context.newPage()
 
             try {
-                const targetToa = company.scrapingTargets.find(
-                    (t) => t.system === ScrapingSystem.TOA
-                )
-
-                if (!targetToa) {
-                    console.warn(`No se encontró el target TOA para la empresa ${company.code}`)
-                    continue
-                }
-
                 const loginService = new LoginService(page)
                 await loginService.login(targetToa)
 
-                console.log(`✅ Scraping completado para ${company.code}`)
-            } catch (err) {
-                console.error(`❌ Error scrapeando ${company.code}:`, err)
+                const filter = new FilterSelector(page)
+                await filter.selectAllChildrenData()
+
+                const ids: string[] = []
+                const scraper = new ProvidersScraper(page)
+                await scraper.getProvidersId(ids)
+
+                const orderFetcher = new OrderDataFetcher(page)
+                const mapaRequestNumber = new Set(requestNumberTTL.map(e => e.numero_de_peticion))
+                const data: DataScraperTOAENTITY[] = []
+
+                for (let i = 0; i <= ENV.LOOKBACK_DAYS; i++) {
+                    const fec = new Date()
+                    fec.setDate(fec.getDate() - i)
+                    const date = getFormattedDateRange(fec)
+
+                    for (const [j, id] of ids.entries()) {
+                        await orderFetcher.getOrderData(
+                            targetToa,
+                            mapaRequestNumber,
+                            mapaEmployees,
+                            id,
+                            data,
+                            date,
+                            i,
+                            j,
+                            ids.length
+                        )
+                    }
+                }
+
+                const orderDetailFetcher = new OrderDetailDataFetcher(page)
+                await orderDetailFetcher.getOrderData(targetToa, data)
+
+                const _data = findAndRemoveDuplicates(data)
+
+                await new SendData().exec(_data)
+
+                console.log(`✅ Scraping TOA completado`)
+                // Enviar webhook para iniciar resumen siempre y cuando sean menos de 10pm
+
+                //#region WebHook
+                const url = `${ENV.HOST_API}/processes/toaorder/update-consumed`
+                const response = await fetch(url, { method: 'POST', headers: { 'Authorization': `Bearer ${ENV.TOKEN}` } })
+                if (!response.ok) {
+                    const errorText = await response.text()
+                    throw new Error(`Error ${response.status}: ${errorText}`)
+                }
+                //#endregion WebHook
             } finally {
-                await context.close()
+                if (ENV.NODE_ENV !== 'development') {
+                    await context.close()
+                }
+            }
+        } finally {
+            if (browser && ENV.NODE_ENV !== 'development') {
+                await browser.close()
             }
         }
-    } catch (err) {
-        console.error('Error al iniciar Puppeteer:', err)
-    } finally {
-        if (browser) {
-            await browser.close()
+    } catch (error) {
+        try {
+            console.error(error)
+            const instance = new MailService()
+            await instance.send(ENV.DEVS_EMAILS, 'Error en scraper TOA', (error as Error).message)
+        } catch (error) {
+            console.error('Erros al enviar Mail (0)', error)
         }
     }
 }
