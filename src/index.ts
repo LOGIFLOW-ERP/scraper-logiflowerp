@@ -3,9 +3,10 @@ import { BootstrapTOA } from './toa'
 import express from 'express'
 import { styleText } from 'util'
 import morgan from 'morgan'
+import { ENV } from './config'
 
 const app = express()
-const port = 3000
+const port = ENV.PORT
 
 app.use(morgan('dev'))
 
