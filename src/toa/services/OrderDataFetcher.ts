@@ -1,16 +1,8 @@
 import { Page } from 'puppeteer-core'
 import {
     convertExcelBytesToJson,
-    formatErrors,
-    groupPlantaUbicacion,
-    parseCustomDate,
-    parseFechaDeCita,
     parseSegmentoXml,
-    parseTrazabilidadDelPluginXml,
 } from '../utils'
-import { plainToInstance } from 'class-transformer'
-import { validate } from 'class-validator'
-import { DataScraperTOAENTITY } from '../domain'
 import { ScrapingCredentialDTO } from 'logiflowerp-sdk'
 import { PageFetcherCSV } from './PageFetcherCSV'
 import { ENV } from '@/config'
@@ -29,7 +21,7 @@ export class OrderDataFetcher {
         mapaRequestNumber: Set<string>,
         mapaEmployees: Set<number>,
         providerId: string,
-        data: DataScraperTOAENTITY[],
+        data: any[],
         date: string,
         _i: number,
         j: number,
@@ -48,7 +40,6 @@ export class OrderDataFetcher {
         // 3. Convertir y parsear datos
         const responseJson = convertExcelBytesToJson(responseBytes)
         parseSegmentoXml(responseJson)
-        parseTrazabilidadDelPluginXml(responseJson)
 
         // 4. Validar y transformar a entidades
         for (const [i, element] of responseJson.entries()) {
@@ -69,52 +60,39 @@ export class OrderDataFetcher {
                     continue
                 }
 
-                element.ProductsServicesContracted = []
-                element['Fecha de Cita'] = parseFechaDeCita(element['Fecha de Cita'])
-                element.SettlementDate = new Date(0)
-                element.StartDate = new Date(0)
-                element._id = crypto.randomUUID()
-                element.isDeleted = false
                 element.date = date
-                element['Velocidad Internet Requerimiento'] = typeof element['Velocidad Internet Requerimiento'] === 'number'
-                    ? element['Velocidad Internet Requerimiento'].toString()
-                    : element['Velocidad Internet Requerimiento']
-                element.Amplificador = typeof element.Amplificador === 'number'
-                    ? element.Amplificador.toString()
-                    : element.Amplificador
-                element['Observaciones en Legados'] = typeof element['Observaciones en Legados'] === 'number'
-                    ? element['Observaciones en Legados'].toString()
-                    : element['Observaciones en Legados']
-                element.Inventory = []
-                element['Código Cierre Cancelada'] = element['Código Cierre Cancelada'] ?? ''
-                element['Nombre Cliente'] = element['Nombre Cliente'] ?? ''
-                element['Habilidad del trabajo'] = element['Habilidad del trabajo'] ?? ''
-                element['Tecnología Voz'] = element['Tecnología Voz'] ?? ''
-                element['Tipo de Tecnología Legados'] = element['Tipo de Tecnología Legados'] ?? ''
-                element['Velocidad Internet Requerimiento'] = element['Velocidad Internet Requerimiento'] ?? ''
-                element['Orden Pangea'] = element['Orden Pangea'] ?? ''
-                element['Tecnología TV'] = element['Tecnología TV'] ?? ''
-                element['Número Teléfono'] = element['Número Teléfono'] ?? 0
-                element['AccessID'] = element['AccessID'] ?? 0
-                element['Fecha de Registro Legados'] = parseCustomDate(element['Fecha de Registro Legados'])
-                element['last_update_date'] = new Date(0)
 
-                groupPlantaUbicacion(element)
+                // element.ProductsServicesContracted = []
+                // element['Fecha de Cita'] = parseFechaDeCita(element['Fecha de Cita'])
+                // element.SettlementDate = new Date(0)
+                // element.StartDate = new Date(0)
+                // element._id = crypto.randomUUID()
+                // element.isDeleted = false
+                // element.date = date
+                // element['Velocidad Internet Requerimiento'] = typeof element['Velocidad Internet Requerimiento'] === 'number'
+                //     ? element['Velocidad Internet Requerimiento'].toString()
+                //     : element['Velocidad Internet Requerimiento']
+                // element.Amplificador = typeof element.Amplificador === 'number'
+                //     ? element.Amplificador.toString()
+                //     : element.Amplificador
+                // element['Observaciones en Legados'] = typeof element['Observaciones en Legados'] === 'number'
+                //     ? element['Observaciones en Legados'].toString()
+                //     : element['Observaciones en Legados']
+                // element.Inventory = []
+                // element['Código Cierre Cancelada'] = element['Código Cierre Cancelada'] ?? ''
+                // element['Nombre Cliente'] = element['Nombre Cliente'] ?? ''
+                // element['Habilidad del trabajo'] = element['Habilidad del trabajo'] ?? ''
+                // element['Tecnología Voz'] = element['Tecnología Voz'] ?? ''
+                // element['Tipo de Tecnología Legados'] = element['Tipo de Tecnología Legados'] ?? ''
+                // element['Velocidad Internet Requerimiento'] = element['Velocidad Internet Requerimiento'] ?? ''
+                // element['Orden Pangea'] = element['Orden Pangea'] ?? ''
+                // element['Tecnología TV'] = element['Tecnología TV'] ?? ''
+                // element['Número Teléfono'] = element['Número Teléfono'] ?? 0
+                // element['AccessID'] = element['AccessID'] ?? 0
+                // element['Fecha de Registro Legados'] = parseCustomDate(element['Fecha de Registro Legados'])
+                // element['last_update_date'] = new Date(0)
 
-                const instance = plainToInstance(
-                    DataScraperTOAENTITY,
-                    element,
-                    { excludeExtraneousValues: true }
-                )
-                const errors = await validate(instance, {
-                    forbidNonWhitelisted: true,
-                    whitelist: true
-                })
-
-                if (errors.length > 0) {
-                    const message = formatErrors(errors)
-                    throw new Error(`❌ Validación fallida: ${message}`)
-                }
+                // groupPlantaUbicacion(element)
 
                 data.push(element)
                 console.log(`Procesando ${_i}/${ENV.LOOKBACK_DAYS} dias (${element.date}), procesando ${j + 1}/${ids} buckets, procesando ${i + 1} de ${responseJson.length} ordenes`)

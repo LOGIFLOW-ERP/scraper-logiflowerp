@@ -9,7 +9,6 @@ import {
     ProvidersScraper,
     SendData,
 } from './services'
-import { DataScraperTOAENTITY } from './domain'
 import { findAndRemoveDuplicates, getFormattedDateRange } from './utils'
 
 export async function BootstrapTOA() {
@@ -68,7 +67,7 @@ export async function BootstrapTOA() {
 
                 const orderFetcher = new OrderDataFetcher(page)
                 const mapaRequestNumber = new Set(requestNumberTTL.map(e => e.numero_de_peticion))
-                const data: DataScraperTOAENTITY[] = []
+                const data: any[] = []
 
                 for (let i = 0; i <= ENV.LOOKBACK_DAYS; i++) {
                     const fec = new Date()

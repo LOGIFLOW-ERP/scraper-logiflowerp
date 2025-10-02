@@ -1,5 +1,4 @@
-import { StateInventory } from "logiflowerp-sdk";
-import { InventoryDTO } from "../domain/InventoryDTO";
+import { InventoryDTO, StateInventory } from "logiflowerp-sdk";
 
 export function getDataInventory(params: any, inv_aid: number) {
     const data: InventoryDTO[] = []
@@ -28,7 +27,7 @@ export function getDataInventory(params: any, inv_aid: number) {
                     invsn,
                     invtype,
                     invpool,
-                    State: StateInventory.PENDIENTE
+                    state: StateInventory.PENDIENTE
                 }
             )
         }

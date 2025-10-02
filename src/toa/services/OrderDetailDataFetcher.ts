@@ -4,7 +4,6 @@ import {
     getDataProductsServicesContracted,
     getSettlementDate,
 } from '../utils'
-import { DataScraperTOAENTITY } from '../domain'
 import { ScrapingCredentialDTO, TOAOrderENTITY, validateCustom } from 'logiflowerp-sdk'
 import { PageFetcherDetail } from './PageFetcherDetail'
 import { SearchPageHandler } from './SearchPageHandler'
@@ -20,7 +19,7 @@ export class OrderDetailDataFetcher {
 
     public async getOrderData(
         targetToa: ScrapingCredentialDTO,
-        data: DataScraperTOAENTITY[],
+        data: any[],
     ) {
         const handler = new SearchPageHandler(this.page, targetToa)
         const _response = await handler.searchAndSelectItem()
@@ -36,26 +35,28 @@ export class OrderDetailDataFetcher {
         }
     }
 
-    private async helper(_response: HTTPResponse, element: DataScraperTOAENTITY, targetToa: ScrapingCredentialDTO) {
+    private async helper(_response: HTTPResponse, order: any, targetToa: ScrapingCredentialDTO) {
         await this.wait(50)
 
         const detail = await this.fetcherDetail.fetchData(_response, {
-            pid: element['ID Recurso'],
+            pid: order['ID Recurso'],
             u: targetToa.userName,
-            requestedAid: element['Número OT'],
-            date: element.date
+            requestedAid: order['Número OT'],
+            date: order.date
         })
 
-        element.ProductsServicesContracted = getDataProductsServicesContracted(detail, element['Número OT'])
-        element.last_update_date = getSettlementDate(detail, element['Número OT'], 'last_update_date')
+        order.ProductsServicesContracted = getDataProductsServicesContracted(detail, order['Número OT'])
+        order.last_update_date = getSettlementDate(detail, order['Número OT'], 'last_update_date')
 
-        if (element['Estado actividad'] === 'Completado') {
-            element.SettlementDate = getSettlementDate(detail, element['Número OT'], 'activity_end_time')
-            element.StartDate = getSettlementDate(detail, element['Número OT'], 'activity_start_time')
-            element.Inventory = getDataInventory(detail, element['Número OT'])
+        if (order['Estado actividad'] === 'Completado') {
+            order.SettlementDate = getSettlementDate(detail, order['Número OT'], 'activity_end_time')
+            order.StartDate = getSettlementDate(detail, order['Número OT'], 'activity_start_time')
+            order.Inventory = getDataInventory(detail, order['Número OT'])
         }
+        order._id = crypto.randomUUID()
+        order.isDeleted = false
 
-        await validateCustom({ ...element, _id: crypto.randomUUID(), isDeleted: false }, TOAOrderENTITY, Error)
+        await validateCustom(order, TOAOrderENTITY, Error)
     }
 
     private async wait(ms: number) {

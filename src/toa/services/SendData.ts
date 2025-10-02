@@ -1,10 +1,10 @@
 import { ENV } from '@/config'
-import { DataScraperTOAENTITY } from '../domain'
+import { TOAOrderENTITY } from 'logiflowerp-sdk'
 
 export class SendData {
     private CHUNK_SIZE = 100
 
-    async exec(data: DataScraperTOAENTITY[]) {
+    async exec(data: TOAOrderENTITY[]) {
         console.info(`Se van a enviar ${data.length} registros en lotes de ${this.CHUNK_SIZE}`)
 
         const url = `${ENV.HOST_API}/processes/toaorder/save`
