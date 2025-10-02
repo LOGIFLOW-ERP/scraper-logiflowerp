@@ -3,6 +3,8 @@ import {
     getDataInventory,
     getDataProductsServicesContracted,
     getSettlementDate,
+    groupPlantaUbicacion,
+    parseCustomDate,
 } from '../utils'
 import { ScrapingCredentialDTO, TOAOrderENTITY, validateCustom } from 'logiflowerp-sdk'
 import { PageFetcherDetail } from './PageFetcherDetail'
@@ -47,12 +49,27 @@ export class OrderDetailDataFetcher {
 
         order.ProductsServicesContracted = getDataProductsServicesContracted(detail, order['Número OT'])
         order.last_update_date = getSettlementDate(detail, order['Número OT'], 'last_update_date')
+        order.SettlementDate = new Date(0)
+        order.StartDate = new Date(0)
+        order.Inventory = []
 
         if (order['Estado actividad'] === 'Completado') {
             order.SettlementDate = getSettlementDate(detail, order['Número OT'], 'activity_end_time')
             order.StartDate = getSettlementDate(detail, order['Número OT'], 'activity_start_time')
             order.Inventory = getDataInventory(detail, order['Número OT'])
         }
+
+        order.Amplificador = typeof order.Amplificador === 'number'
+            ? order.Amplificador.toString()
+            : order.Amplificador
+        groupPlantaUbicacion(order)
+        order['Número Teléfono'] = order['Número Teléfono'] ?? 0
+        order['Fecha de Cita'] = getSettlementDate(detail, order['Número OT'], '493')
+        order['Fecha de Registro Legados'] = parseCustomDate(order['Fecha de Registro Legados'])
+        order['Código Cierre Cancelada'] = order['Código Cierre Cancelada'] ?? ''
+        order['Velocidad Internet Requerimiento'] = typeof order['Velocidad Internet Requerimiento'] === 'number'
+            ? order['Velocidad Internet Requerimiento'].toString()
+            : order['Velocidad Internet Requerimiento']
         order._id = crypto.randomUUID()
         order.isDeleted = false
 
