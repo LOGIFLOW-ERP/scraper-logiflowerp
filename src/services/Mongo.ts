@@ -58,7 +58,7 @@ export class MongoService {
     }
 
     public async getRequestNumberTTL() {
-        const collection = await this.getCollection<RequestNumberTTLENTITY>(db_root, collections.requestNumberTTL)
+        const collection = await this.getCollection<RequestNumberTTLENTITY>(db_root, collections.toaRequestNumberTTL)
         return collection.find().toArray()
     }
 

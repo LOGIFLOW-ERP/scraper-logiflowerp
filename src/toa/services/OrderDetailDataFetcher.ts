@@ -5,6 +5,7 @@ import {
     getSettlementDate,
     groupPlantaUbicacion,
     parseCustomDate,
+    verifyTimeSlot,
 } from '../utils'
 import { ScrapingCredentialDTO, TOAOrderENTITY, validateCustom } from 'logiflowerp-sdk'
 import { PageFetcherDetail } from './PageFetcherDetail'
@@ -58,6 +59,8 @@ export class OrderDetailDataFetcher {
             order.StartDate = getSettlementDate(detail, order['Número OT'], 'activity_start_time')
             order.Inventory = getDataInventory(detail, order['Número OT'])
         }
+
+        verifyTimeSlot(detail, order['Número OT'], order)
 
         order.Amplificador = typeof order.Amplificador === 'number'
             ? order.Amplificador.toString()
