@@ -27,7 +27,7 @@ export function getDataInventory(params: any, inv_aid: number) {
                     invsn,
                     invtype,
                     invpool,
-                    state: StateInventory.PENDIENTE
+                    // state: StateInventory.PENDIENTE,
                 } as InventoryDTO
             )
         }

@@ -69,7 +69,7 @@ export async function BootstrapTOA() {
                 const mapaRequestNumber = new Set(requestNumberTTL.map(e => e.numero_de_peticion))
                 const data: any[] = []
 
-                for (let i = 0; i <= ENV.LOOKBACK_DAYS; i++) {
+                for (let i = 0; i <= ENV.TOA_LOOKBACK_DAYS; i++) {
                     const fec = new Date()
                     fec.setDate(fec.getDate() - i)
                     const date = getFormattedDateRange(fec)

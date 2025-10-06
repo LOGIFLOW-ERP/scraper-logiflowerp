@@ -1,0 +1,5 @@
+export * from './b64decode'
+export * from './buildModel'
+export * from './parseUbicacion'
+export * from './getFechaVisi'
+export * from './htmlStringToJson'

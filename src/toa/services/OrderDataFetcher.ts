@@ -95,7 +95,7 @@ export class OrderDataFetcher {
                 // groupPlantaUbicacion(element)
 
                 data.push(element)
-                console.log(`Procesando ${_i}/${ENV.LOOKBACK_DAYS} dias (${element.date}), procesando ${j + 1}/${ids} buckets, procesando ${i + 1} de ${responseJson.length} ordenes`)
+                console.log(`Procesando ${_i}/${ENV.TOA_LOOKBACK_DAYS} dias (${element.date}), procesando ${j + 1}/${ids} buckets, procesando ${i + 1} de ${responseJson.length} ordenes`)
             } catch (error) {
                 console.log(element)
                 throw error
