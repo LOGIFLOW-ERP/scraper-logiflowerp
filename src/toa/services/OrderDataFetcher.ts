@@ -19,7 +19,7 @@ export class OrderDataFetcher {
     public async getOrderData(
         targetToa: ScrapingCredentialDTO,
         mapaRequestNumber: Set<string>,
-        mapaEmployees: Set<number>,
+        mapaEmployees: Set<string>,
         providerId: string,
         data: any[],
         date: string,
@@ -55,6 +55,10 @@ export class OrderDataFetcher {
                 if (mapaRequestNumber.has(element['Número de Petición'])) {
                     continue
                 }
+
+                element['ID Recurso'] = typeof element['ID Recurso'] === 'number'
+                    ? element['ID Recurso'].toString()
+                    : element['ID Recurso']
 
                 if (!mapaEmployees.has(element['ID Recurso'])) {
                     continue

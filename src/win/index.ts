@@ -1,17 +1,25 @@
 import axios from 'axios'
 import { wrapper } from 'axios-cookiejar-support'
 import { CookieJar } from 'tough-cookie'
-import { getData, login } from './services'
+import { getData, login, SendData } from './services'
 import { buildModel } from './utils'
 import { MailService, MongoService } from '@/services'
 import { ENV } from '@/config'
-import { ScrapingCredentialDTO, ScrapingSystem } from 'logiflowerp-sdk'
+import { RootCompanyENTITY, ScrapingSystem } from 'logiflowerp-sdk'
+
+const system = ScrapingSystem.WIN
 
 export async function BootstrapWIN() {
-    const system = ScrapingSystem.WIN
     try {
         const mongoService = new MongoService()
-        const companies = await mongoService.getActiveCompanies()
+
+        let companies
+        try {
+            companies = await mongoService.getActiveCompanies()
+        } finally {
+            await mongoService.close()
+        }
+
         const dataCompanies = companies.filter(e => e.scrapingTargets.some(el => el.system === system))
         if (!dataCompanies.length) {
             console.log(`[INFO] No hay empresas con credenciales para sistema ${system}`)
@@ -19,11 +27,7 @@ export async function BootstrapWIN() {
         for (const [i, company] of dataCompanies.entries()) {
             console.log(`[INFO] Scraping ${company.code} (${i + 1} de ${dataCompanies.length})...`)
             try {
-                const scrapingCredential = company.scrapingTargets.find(e => e.system === system)
-                if (!scrapingCredential) {
-                    throw new Error(`No se pudo obtener scrapingCredential ${system}`)
-                }
-                await exec(scrapingCredential)
+                await exec(company)
                 console.log(`[INFO] Scraping completado para ${company.code}...`)
             } catch (error) {
                 console.error(error)
@@ -43,11 +47,36 @@ export async function BootstrapWIN() {
     }
 }
 
-async function exec(scrapingCredential: ScrapingCredentialDTO) {
+async function exec(company: Pick<RootCompanyENTITY, "_id" | "scrapingTargets" | "code">) {
     const jar = new CookieJar()
     const client = wrapper(axios.create({ jar, withCredentials: true }))
 
+    const scrapingCredential = company.scrapingTargets.find(e => e.system === system)
+    if (!scrapingCredential) {
+        throw new Error(`No se pudo obtener scrapingCredential ${system}`)
+    }
+
+    const mongoService = new MongoService()
+
+    let requestNumberTTL
+    try {
+        requestNumberTTL = await mongoService.getWinRequestNumberTTL(company.code)
+    } finally {
+        await mongoService.close()
+    }
+    const mapaRequestNumber = new Set(requestNumberTTL.map(e => e.numero_de_peticion))
+
+    let employees
+    try {
+        employees = await mongoService.getPersonelCompanies([company])
+    } finally {
+        await mongoService.close()
+    }
+
+    const mapaEmployees = new Set(employees.flatMap(e => e.resourceSystem.filter(el => el.system === ScrapingSystem.TOA).map(e => e.resource_id)))
+
     await login(client, scrapingCredential)
     const data = await getData(client, scrapingCredential)
-    const entities = await buildModel(data)
+    await buildModel(data, mapaRequestNumber, mapaEmployees)
+    await new SendData().exec(data, company.code)
 }

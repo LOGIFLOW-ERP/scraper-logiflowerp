@@ -10,6 +10,7 @@ import {
     SendData,
 } from './services'
 import { findAndRemoveDuplicates, getFormattedDateRange } from './utils'
+import { ScrapingSystem } from 'logiflowerp-sdk'
 
 export async function BootstrapTOA() {
     console.info(`🚀 Inicio scraper TOA...`)
@@ -25,7 +26,7 @@ export async function BootstrapTOA() {
 
         let requestNumberTTL
         try {
-            requestNumberTTL = await mongoService.getRequestNumberTTL()
+            requestNumberTTL = await mongoService.getToaRequestNumberTTL()
         } finally {
             await mongoService.close()
         }
@@ -33,6 +34,7 @@ export async function BootstrapTOA() {
         let companies
         try {
             companies = await mongoService.getActiveCompanies()
+            companies = companies.filter(e => e.scrapingTargets.some(el => el.system === ScrapingSystem.TOA))
         } finally {
             await mongoService.close()
         }
@@ -44,7 +46,7 @@ export async function BootstrapTOA() {
             await mongoService.close()
         }
 
-        const mapaEmployees = new Set(employees.map(e => e.toa_resource_id))
+        const mapaEmployees = new Set(employees.flatMap(e => e.resourceSystem.filter(el => el.system === ScrapingSystem.TOA).map(e => e.resource_id)))
 
         let browser: Browser | null = null
 

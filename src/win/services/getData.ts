@@ -1,9 +1,12 @@
 import { AxiosInstance } from 'axios';
 import { b64decode, getFechaVisi, htmlStringToJson } from '../utils';
 import { ScrapingCredentialDTO } from 'logiflowerp-sdk';
-// import fs from 'fs'
+import fs from 'fs'
 
-export async function getData(client: AxiosInstance, scrapingCredential: ScrapingCredentialDTO) {
+export async function getData(
+    client: AxiosInstance,
+    scrapingCredential: ScrapingCredentialDTO,
+) {
     const { Desde, Hasta } = getFechaVisi()
     const cargarGrillaPayload = {
         tipoOrden: 1,
@@ -38,7 +41,7 @@ export async function getData(client: AxiosInstance, scrapingCredential: Scrapin
         MotivosReproId: '0'
     }
 
-    console.log('   [INFO] Solicitando mis órdenes (cargarGrilla)...')
+    console.log(`   [INFO] Solicitando mis órdenes (cargarGrilla Desde: ${Desde} - Hasta: ${Hasta})...`)
 
     const grillaRes = await client.post(
         `${scrapingCredential.url}/Paginas/OperadoresBO/misOrdenes.aspx/cargarGrilla`,
@@ -54,8 +57,8 @@ export async function getData(client: AxiosInstance, scrapingCredential: Scrapin
 
     const data = htmlStringToJson(decodedHtml)
 
-    // const jsonData = JSON.stringify(data, null, 2)
-    // fs.writeFileSync('data.json', jsonData, 'utf8')
+    const jsonData = JSON.stringify(data, null, 2)
+    fs.writeFileSync('data.json', jsonData, 'utf8')
     console.log(`   [INFO] Se obtuvo ${data.length} órdenes`)
     return data
 }

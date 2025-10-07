@@ -1,7 +1,7 @@
-import { InventoryDTO, StateInventory } from "logiflowerp-sdk";
+import { InventoryToaDTO } from "logiflowerp-sdk";
 
 export function getDataInventory(params: any, inv_aid: number) {
-    const data: InventoryDTO[] = []
+    const data: InventoryToaDTO[] = []
 
     for (const key in params.delta.Inventory) {
         const value = params.delta.Inventory[key]
@@ -28,7 +28,7 @@ export function getDataInventory(params: any, inv_aid: number) {
                     invtype,
                     invpool,
                     // state: StateInventory.PENDIENTE,
-                } as InventoryDTO
+                } as InventoryToaDTO
             )
         }
     }

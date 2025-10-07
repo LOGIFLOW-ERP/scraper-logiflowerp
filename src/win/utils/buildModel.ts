@@ -3,10 +3,25 @@ import { parseDateTime } from './parseDateTime'
 import { parseHistorialEstados } from './parseHistorialEstados'
 import { parseUbicacion } from './parseUbicacion'
 
-export async function buildModel(data: Record<string, any>[]) {
-    const _data: WINOrderENTITY[] = []
+
+export async function buildModel(
+    data: Record<string, any>[],
+    mapaRequestNumber: Set<string>,
+    mapaEmployees: Set<string>
+) {
+    const _data: Record<string, any>[] = []
     for (const el of data) {
         try {
+            if (mapaRequestNumber.has(el['Cod Seguimiento Cliente'])) {
+                continue
+            }
+
+            el['ID Recurso'] = el['Cuadrilla'].split('COBRA SGI')[0].replace(' ', '')
+
+            if (!mapaEmployees.has(el['ID Recurso'])) {
+                continue
+            }
+
             el['Fecha Visita'] = parseDateTime(el['Fecha Visita'], 'Fecha Visita')
             el['Inicio de Visita'] = el['Inicio de Visita'] === ''
                 ? new Date(0)
@@ -20,7 +35,8 @@ export async function buildModel(data: Record<string, any>[]) {
             parseUbicacion(el)
             el._id = crypto.randomUUID()
             el.Inventory = []
-            _data.push(await validateCustom(el, WINOrderENTITY, Error))
+            await validateCustom(el, WINOrderENTITY, Error)
+            _data.push(el)
         } catch (error) {
             console.log(el)
             throw error
