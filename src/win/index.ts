@@ -73,10 +73,10 @@ async function exec(company: Pick<RootCompanyENTITY, "_id" | "scrapingTargets" |
         await mongoService.close()
     }
 
-    const mapaEmployees = new Set(employees.flatMap(e => e.resourceSystem.filter(el => el.system === ScrapingSystem.TOA).map(e => e.resource_id)))
+    const mapaEmployees = new Set(employees.flatMap(e => e.resourceSystem.filter(el => el.system === ScrapingSystem.WIN).map(e => e.resource_id)))
 
     await login(client, scrapingCredential)
     const data = await getData(client, scrapingCredential)
-    await buildModel(data, mapaRequestNumber, mapaEmployees)
-    await new SendData().exec(data, company.code)
+    const _data = await buildModel(data, mapaRequestNumber, mapaEmployees)
+    await new SendData().exec(_data, company.code)
 }

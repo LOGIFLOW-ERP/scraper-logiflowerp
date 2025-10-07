@@ -1,15 +1,24 @@
 import * as cheerio from 'cheerio'
 
-export function htmlStringToJson(htmlString: string) {
-    const $ = cheerio.load(htmlString);
+export function htmlStringToJson(htmlString: string, headersFromFirstPage?: string[]) {
+    if (headersFromFirstPage) {
+        htmlString = `<table><tbody>${htmlString}</tbody></table>`
+    }
+
+    const $ = cheerio.load(htmlString)
 
     // Extraemos headers
-    const headers: string[] = [];
-    $('table thead th').each((i, th) => {
-        headers.push($(th).text().trim());
-    });
+    let headers: string[] = []
 
-    const data: Record<string, string>[] = [];
+    if (headersFromFirstPage) {
+        headers = headersFromFirstPage
+    } else {
+        $('table thead th').each((i, th) => {
+            headers.push($(th).text().trim())
+        })
+    }
+
+    const data: Record<string, string>[] = []
 
     $('table tbody tr').each((i, tr) => {
         const obj: Record<string, string> = {};
@@ -41,5 +50,5 @@ export function htmlStringToJson(htmlString: string) {
         data.push(obj);
     });
 
-    return data;
+    return { data, headers };
 }

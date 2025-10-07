@@ -2,7 +2,7 @@ export function parseDateTime(dateTimeStr: string, key: string) {
     try {
         // "dd/mm/yyyy hh:mm"
         const regex = /^\d{2}\/\d{2}\/\d{4}\s\d{2}:\d{2}$/
-        // "d/m/yyyy hh:mm:ss AM|PM"
+        // "m/d/yyyy hh:mm:ss AM|PM"
         const regex1 = /^\d{1,2}\/\d{1,2}\/\d{4}\s\d{1,2}:\d{2}:\d{2}\s(AM|PM)$/
         // "dd/mm/yyyy hh:mm:ss"
         const regex2 = /^\d{2}\/\d{2}\/\d{4}\s\d{2}:\d{2}:\d{2}$/
@@ -15,7 +15,7 @@ export function parseDateTime(dateTimeStr: string, key: string) {
             isoString = `${yyyy}-${mm}-${dd}T${hora}`
         } else if (regex1.test(dateTimeStr)) {
             const [fecha, hora, ampm] = dateTimeStr.split(' ')
-            const [d, m, yyyy] = fecha.split('/')
+            const [m, d, yyyy] = fecha.split('/')
             let [hh, min, sec] = hora.split(':').map(Number)
 
             if (ampm === 'PM' && hh < 12) hh += 12

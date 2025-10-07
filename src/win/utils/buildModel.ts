@@ -2,6 +2,8 @@ import { validateCustom, WINOrderENTITY } from 'logiflowerp-sdk'
 import { parseDateTime } from './parseDateTime'
 import { parseHistorialEstados } from './parseHistorialEstados'
 import { parseUbicacion } from './parseUbicacion'
+import { parseDatosTecnicos } from './parseDatosTecnicos'
+import { parseSuscripcion } from './parseSuscripcion'
 
 
 export async function buildModel(
@@ -16,7 +18,7 @@ export async function buildModel(
                 continue
             }
 
-            el['ID Recurso'] = el['Cuadrilla'].split('COBRA SGI')[0].replace(' ', '')
+            el['ID Recurso'] = el['Cuadrilla'].split('COBRA SGI')[0].replaceAll(' ', '')
 
             if (!mapaEmployees.has(el['ID Recurso'])) {
                 continue
@@ -33,9 +35,11 @@ export async function buildModel(
             el['Fecha Solicitud'] = parseDateTime(el['Fecha Solicitud'], 'Fecha Solicitud')
             parseHistorialEstados(el)
             parseUbicacion(el)
+            parseDatosTecnicos(el)
+            parseSuscripcion(el)
             el._id = crypto.randomUUID()
             el.Inventory = []
-            await validateCustom(el, WINOrderENTITY, Error)
+            await validateCustom(structuredClone(el), WINOrderENTITY, Error)
             _data.push(el)
         } catch (error) {
             console.log(el)
