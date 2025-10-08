@@ -39,6 +39,7 @@ export async function buildModel(
             parseSuscripcion(el)
             el._id = crypto.randomUUID()
             el.Inventory = []
+            el.isDeleted = false
             await validateCustom(structuredClone(el), WINOrderENTITY, Error)
             _data.push(el)
         } catch (error) {

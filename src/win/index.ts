@@ -38,6 +38,15 @@ export async function BootstrapWIN() {
             }
         }
         console.log(`[INFO] Scraping completado ✅`)
+
+        //#region WebHook
+        const url = `${ENV.HOST_API}/processes/winorder/update-consumed`
+        const response = await fetch(url, { method: 'POST', headers: { 'Authorization': `Bearer ${ENV.TOKEN}` } })
+        if (!response.ok) {
+            const errorText = await response.text()
+            throw new Error(`Error ${response.status}: ${errorText}`)
+        }
+        //#endregion WebHook
     } catch (error) {
         console.error(error)
         const instance = new MailService()
