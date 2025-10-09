@@ -57,8 +57,13 @@ export class MongoService {
         return dataEmployees
     }
 
-    public async getRequestNumberTTL() {
-        const collection = await this.getCollection<RequestNumberTTLENTITY>(db_root, collections.requestNumberTTL)
+    public async getToaRequestNumberTTL() {
+        const collection = await this.getCollection<RequestNumberTTLENTITY>(db_root, collections.toaRequestNumberTTL)
+        return collection.find().toArray()
+    }
+
+    public async getWinRequestNumberTTL(db:string) {
+        const collection = await this.getCollection<RequestNumberTTLENTITY>(db, collections.winRequestNumberTTL)
         return collection.find().toArray()
     }
 

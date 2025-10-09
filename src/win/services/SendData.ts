@@ -1,17 +1,16 @@
 import { ENV } from '@/config'
-import { TOAOrderENTITY } from 'logiflowerp-sdk'
 
 export class SendData {
     private CHUNK_SIZE = 100
 
-    async exec(data: TOAOrderENTITY[]) {
-        console.info(`Se van a enviar ${data.length} registros en lotes de ${this.CHUNK_SIZE}`)
+    async exec(data: Record<string, string>[], db: string) {
+        console.info(`  [INFO] Se van a enviar ${data.length} registros en lotes de ${this.CHUNK_SIZE}`)
 
-        const url = `${ENV.HOST_API}/processes/toaorder/save`
+        const url = `${ENV.HOST_API}/processes/winorder/save`
 
         for (let i = 0; i < data.length; i += this.CHUNK_SIZE) {
             const chunk = data.slice(i, i + this.CHUNK_SIZE)
-            console.info(`Enviando lote ${i / this.CHUNK_SIZE + 1} (${chunk.length} registros)`)
+            console.info(`  [INFO] Enviando lote ${i / this.CHUNK_SIZE + 1} (${chunk.length} registros)`)
 
             try {
                 const response = await fetch(url, {
@@ -20,7 +19,7 @@ export class SendData {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${ENV.TOKEN}`,
                     },
-                    body: JSON.stringify({ data: chunk }),
+                    body: JSON.stringify({ data: chunk, db }),
                 })
 
                 if (!response.ok) {
@@ -33,6 +32,6 @@ export class SendData {
             }
         }
 
-        console.info('Todos los lotes fueron enviados correctamente.')
+        console.info('  [INFO] Todos los lotes fueron enviados correctamente.')
     }
 }

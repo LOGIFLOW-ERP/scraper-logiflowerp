@@ -1,13 +1,11 @@
-import { DataScraperTOAENTITY } from "../domain";
-
-const resolver = (a: DataScraperTOAENTITY, b: DataScraperTOAENTITY) => {
+const resolver = (a: any, b: any) => {
     return new Date(a['last_update_date']).getTime() > new Date(b['last_update_date']).getTime() ? a : b;
 }
 
 export function findAndRemoveDuplicates(
-    data: DataScraperTOAENTITY[]
+    data: any[]
 ) {
-    const mapa = new Map<string, DataScraperTOAENTITY>();
+    const mapa = new Map<string, any>();
 
     for (const element of data) {
         const key = element["Número de Petición"] as string;
