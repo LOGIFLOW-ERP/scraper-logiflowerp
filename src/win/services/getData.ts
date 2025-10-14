@@ -3,6 +3,7 @@ import { AxiosInstance } from 'axios';
 import { saveColumns } from './saveColumns';
 import { ScrapingCredentialDTO } from 'logiflowerp-sdk';
 import { b64decode, getFechaVisi, htmlStringToJson } from '../utils';
+import { ENV } from '@/config';
 
 export async function getData(
     client: AxiosInstance,
@@ -82,7 +83,10 @@ export async function getData(
         paginaActual++
     }
 
-    fs.writeFileSync('data.json', JSON.stringify(todasLasOrdenes, null, 4), 'utf8')
+    if (ENV.NODE_ENV === 'development') {
+        fs.writeFileSync('data.json', JSON.stringify(todasLasOrdenes, null, 4), 'utf8')
+    }
+
     console.log(`   [INFO] Se obtuvieron ${todasLasOrdenes.length} registros en total`)
 
     return todasLasOrdenes
