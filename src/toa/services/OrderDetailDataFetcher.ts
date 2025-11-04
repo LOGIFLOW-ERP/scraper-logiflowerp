@@ -48,6 +48,10 @@ export class OrderDetailDataFetcher {
             date: order.date
         })
 
+        const subtipoActividad = order['Subtipo de Actividad']
+        const fueraDeTOA = subtipoActividad.toLowerCase().includes('fuera de toa')
+        const masiva = subtipoActividad.toLowerCase().includes('masiva')
+
         order.ProductsServicesContracted = getDataProductsServicesContracted(detail, order['Número OT'])
         order.last_update_date = getSettlementDate(detail, order['Número OT'], 'last_update_date')
         order.SettlementDate = new Date(0)
@@ -60,6 +64,8 @@ export class OrderDetailDataFetcher {
             order.Inventory = getDataInventory(detail, order['Número OT'])
         }
 
+        order['Time Slot'] = order['Time Slot'] ?? '0-0'
+
         verifyTimeSlot(detail, order['Número OT'], order)
 
         order.Amplificador = typeof order.Amplificador === 'number'
@@ -67,7 +73,9 @@ export class OrderDetailDataFetcher {
             : order.Amplificador
         groupPlantaUbicacion(order)
         order['Número Teléfono'] = order['Número Teléfono'] ?? 0
-        order['Fecha de Cita'] = getSettlementDate(detail, order['Número OT'], '493')
+        order['Fecha de Cita'] = fueraDeTOA || masiva
+            ? new Date(0)
+            : getSettlementDate(detail, order['Número OT'], '493')
         order['Fecha de Registro Legados'] = parseCustomDate(order['Fecha de Registro Legados'])
         order['Código Cierre Cancelada'] = order['Código Cierre Cancelada'] ?? ''
         order['Velocidad Internet Requerimiento'] = typeof order['Velocidad Internet Requerimiento'] === 'number'

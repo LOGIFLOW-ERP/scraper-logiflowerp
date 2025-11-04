@@ -48,6 +48,10 @@ export class OrderDataFetcher {
                     continue
                 }
 
+                if (element['Subtipo de Actividad'] === 'Inspección') {
+                    continue
+                }
+
                 element['Número de Petición'] = typeof element['Número de Petición'] === 'number'
                     ? element['Número de Petición'].toString()
                     : element['Número de Petición']
