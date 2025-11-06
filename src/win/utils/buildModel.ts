@@ -1,4 +1,4 @@
-import { validateCustom, WINOrderENTITY } from 'logiflowerp-sdk'
+import { StateInternalOrderWin, validateCustom, WINOrderENTITY } from 'logiflowerp-sdk'
 import { parseDateTime } from './parseDateTime'
 import { parseHistorialEstados } from './parseHistorialEstados'
 import { parseUbicacion } from './parseUbicacion'
@@ -40,6 +40,7 @@ export async function buildModel(
             el._id = crypto.randomUUID()
             el.Inventory = []
             el.isDeleted = false
+            el['Estado Interno'] = StateInternalOrderWin.PENDIENTE
             await validateCustom(structuredClone(el), WINOrderENTITY, Error)
             _data.push(el)
         } catch (error) {

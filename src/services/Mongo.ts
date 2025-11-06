@@ -62,28 +62,62 @@ export class MongoService {
         return collection.find().toArray()
     }
 
-    public async getWinRequestNumberTTL(db:string) {
+    public async getWinRequestNumberTTL(db: string) {
         const collection = await this.getCollection<RequestNumberTTLENTITY>(db, collections.winRequestNumberTTL)
         return collection.find().toArray()
     }
 
-    public async getScrapingCredentialTOA() {
-        const companies = await this.getCollection<ScrapingCredentialENTITY>(db_root, collections.scrapingCredential)
+    // public async getScrapingCredentialTOA() {
+    //     const col = await this.getCollection<ScrapingCredentialENTITY>(db_root, collections.scrapingCredential)
+    //     const query = { system: ScrapingSystem.TOA, isDeleted: false }
+    //     const result = await col
+    //         .find<ScrapingCredentialENTITY>(query)
+    //         .toArray()
 
-        const query = { system: ScrapingSystem.TOA, isDeleted: false }
+    //     if (result.length !== 1) {
+    //         throw new Error(`Hay ${result.length} resultados para credencial de scraping TOA`)
+    //     }
 
-        const result = await companies
+    //     return result[0]
+    // }
+
+    // public async getScrapingCredentialWIN() {
+    //     const col = await this.getCollection<ScrapingCredentialENTITY>(db_root, collections.scrapingCredential)
+    //     const query = { system: ScrapingSystem.WIN, isDeleted: false }
+    //     const result = await col
+    //         .find<ScrapingCredentialENTITY>(query)
+    //         .toArray()
+
+    //     if (result.length !== 1) {
+    //         throw new Error(`Hay ${result.length} resultados para credencial de scraping WIN`)
+    //     }
+
+    //     return result[0]
+    // }
+
+    async getScrapingCredentialDBRoot(query: Partial<ScrapingCredentialENTITY>) {
+        const col = await this.getCollection<ScrapingCredentialENTITY>(db_root, collections.scrapingCredential)
+        const result = await col
             .find<ScrapingCredentialENTITY>(query)
             .toArray()
-
         if (result.length !== 1) {
-            throw new Error(`Hay ${result.length} resultados para credencial de scraping TOA`)
+            throw new Error(`Hay ${result.length} resultados para credencial de scraping WIN`)
         }
-
         return result[0]
     }
 
-    public async close() {
+    async updateScrapingCredentialDBRoot(query: Partial<ScrapingCredentialENTITY>, scraping_data: boolean) {
+        const col = await this.getCollection<ScrapingCredentialENTITY>(db_root, collections.scrapingCredential)
+        const result = await col.updateOne(query, { $set: { scraping_data } })
+        if (result.matchedCount === 0) {
+            throw new Error('No se encontró ninguna credencial que coincida con el filtro')
+        }
+        if (result.modifiedCount === 0) {
+            console.warn('El valor de scraping_data ya era el mismo, no se modificó ningún documento')
+        }
+    }
+
+    async close() {
         await this.client.close()
         this.isConnected = false
     }
