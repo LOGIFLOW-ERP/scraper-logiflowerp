@@ -43,6 +43,7 @@ export async function buildModel(
             parseDatosTecnicos(el)
             parseSuscripcion(el)
             el._id = crypto.randomUUID()
+            el.Fotos = []
             el.Inventory = []
             el.isDeleted = false
             el['Estado Interno'] = StateInternalOrderWin.PENDIENTE
