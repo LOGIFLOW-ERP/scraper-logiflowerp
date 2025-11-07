@@ -28,7 +28,7 @@ export async function BootstrapWIN() {
         try {
             const login_failed = await mongoService.getLoginFailedWin(company)
             if (login_failed) {
-                console.warn(`[WARN] ⚠️ login_failed para ${company.code} es true, verificar credenciales`)
+                console.warn(`[WARN] ⚠️  login_failed para ${company.code} es true, verificar credenciales`)
                 return
             }
 
