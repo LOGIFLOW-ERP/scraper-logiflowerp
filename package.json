@@ -28,7 +28,7 @@
     "class-validator": "^0.14.2",
     "env-var": "^7.5.0",
     "fast-xml-parser": "^5.2.5",
-    "logiflowerp-sdk": "^1.0.254",
+    "logiflowerp-sdk": "^1.0.259",
     "mongodb": "^6.19.0",
     "node-cron": "^4.2.1",
     "nodemailer": "^7.0.9",

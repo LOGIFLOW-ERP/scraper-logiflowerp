@@ -18,7 +18,7 @@ export async function buildModel(
                 continue
             }
 
-            el['ID Recurso'] = el['Cuadrilla'].split('COBRA SGI')[0].replaceAll(' ', '')
+            el['ID Recurso'] = el['Cuadrilla']
 
             if (!mapaEmployees.has(el['ID Recurso'])) {
                 continue
