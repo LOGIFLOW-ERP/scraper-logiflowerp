@@ -1,6 +1,16 @@
+import { StateInternalOrderWin } from "logiflowerp-sdk"
 import { parseDateTime } from "./parseDateTime"
 
 export function parseHistorialEstados(row: Record<string, any>) {
+    row['Historial de Estados Interno'] = [
+        {
+            Fecha: new Date(),
+            Estado: StateInternalOrderWin.PENDIENTE,
+            Usuario: 'AUTÓMATA LOGIFLOW',
+            Observacion: 'Orden registrada.'
+        }
+    ]
+
     const texto: string = row['Historial de Estados'] ?? row['Historial de Estados_1']
 
     // Separar por punto y coma (cada registro)

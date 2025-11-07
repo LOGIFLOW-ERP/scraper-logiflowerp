@@ -75,6 +75,6 @@ async function exec(company: CompanyRootFields) {
 
     await login(client, scrapingCredential, company)
     const data = await getData(client, scrapingCredential)
-    const _data = await buildModel(data, mapaRequestNumber, mapaEmployees)
+    const _data = await buildModel(data, mapaRequestNumber, mapaEmployees, company)
     await new SendData().exec(_data, company.code)
 }
