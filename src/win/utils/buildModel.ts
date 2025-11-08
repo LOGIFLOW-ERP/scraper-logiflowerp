@@ -6,6 +6,7 @@ import { parseDatosTecnicos } from './parseDatosTecnicos'
 import { parseSuscripcion } from './parseSuscripcion'
 import fs from 'fs'
 import { CompanyRootFields } from '@/services'
+import { ENV } from '@/config'
 
 export async function buildModel(
     data: Record<string, any>[],
@@ -56,8 +57,10 @@ export async function buildModel(
     }
     console.log(`   [INFO] Se modeló ${_data.length} órdenes`)
 
-    const contenido = Array.from(recursosUnicos).join('\n')
-    fs.writeFileSync(`recursos_unicos_${company.code}.txt`, contenido, 'utf-8')
+    if (ENV.NODE_ENV === 'development') {
+        const contenido = Array.from(recursosUnicos).join('\n')
+        fs.writeFileSync(`recursos_unicos_${company.code}.txt`, contenido, 'utf-8')
+    }
 
     return _data
 }
