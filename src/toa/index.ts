@@ -19,7 +19,7 @@ export async function BootstrapTOA() {
 
         let targetToa
         try {
-            targetToa = await mongoService.getScrapingCredentialTOA()
+            targetToa = await mongoService.getScrapingCredentialDBRoot({ system: ScrapingSystem.TOA, isDeleted: false })
         } finally {
             await mongoService.close()
         }

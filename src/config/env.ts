@@ -1,7 +1,7 @@
 import { get } from 'env-var';
 
 export const ENV = Object.freeze({
-    PORT: get('PORT').required().asPortNumber(),
+    // PORT: get('PORT').required().asPortNumber(),
     HOST_API: get('HOST_API').required().asUrlString(),
     MONGO_URI: get('MONGO_URI').required().asUrlString(),
     EMAIL_USER: get('EMAIL_USER').required().asEmailString(),
@@ -13,6 +13,8 @@ export const ENV = Object.freeze({
     EXECUTABLE_PATH: get('EXECUTABLE_PATH').required().asString(),
     TOA_LOOKBACK_DAYS: get('TOA_LOOKBACK_DAYS').required().asIntPositive(),
     WIN_LOOKBACK_DAYS: get('WIN_LOOKBACK_DAYS').required().asIntPositive(),
+    WIN_EXECUTION_START_HOUR: get('WIN_EXECUTION_START_HOUR').required().asIntPositive(),
+    WIN_EXECUTION_END_HOUR: get('WIN_EXECUTION_END_HOUR').required().asIntPositive(),
     TOKEN: get('TOKEN').required().asString(),
     DEVS_EMAILS: get('DEVS_EMAILS').required().asArray(),
 })

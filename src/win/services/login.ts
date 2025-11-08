@@ -1,3 +1,4 @@
+import { CompanyRootFields, MailService, MongoService } from '@/services';
 import { AxiosInstance } from 'axios'
 import { ScrapingCredentialDTO } from 'logiflowerp-sdk';
 
@@ -5,7 +6,11 @@ function b64decode(str: string) {
     return Buffer.from(str, 'base64').toString('utf8')
 }
 
-export async function login(client: AxiosInstance, scrapingCredential: ScrapingCredentialDTO) {
+export async function login(
+    client: AxiosInstance,
+    scrapingCredential: ScrapingCredentialDTO,
+    company: CompanyRootFields
+) {
     console.log('   [INFO] Iniciando login...')
 
     const loginPayload = {
@@ -31,6 +36,12 @@ export async function login(client: AxiosInstance, scrapingCredential: ScrapingC
     const mensajeDecoded = b64decode(decodedD.mensaje)
 
     if (decodedD.codigo !== '99') {
+        const mongoService = new MongoService()
+        await mongoService.updateScrapingCredentialLoginFailedWin(company)
+        const instance = new MailService()
+        console.info('📧 Enviando mail...')
+        await instance.send(company.email, `[ERROR] No se pudo iniciar sesión en sistema WIN`, mensajeDecoded)
+        console.info('📧 Mail enviado.')
         throw new Error(`[ERROR] No se pudo iniciar sesión: ${mensajeDecoded}`)
     }
 
