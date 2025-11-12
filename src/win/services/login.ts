@@ -1,3 +1,4 @@
+import { ENV } from '@/config';
 import { CompanyRootFields, MailService, MongoService } from '@/services';
 import { AxiosInstance } from 'axios'
 import { ScrapingCredentialDTO } from 'logiflowerp-sdk';
@@ -40,7 +41,7 @@ export async function login(
         await mongoService.updateScrapingCredentialLoginFailedWin(company)
         const instance = new MailService()
         console.info('📧 Enviando mail...')
-        await instance.send(company.email, `[ERROR] No se pudo iniciar sesión en sistema WIN`, mensajeDecoded)
+        await instance.send([company.email, ...ENV.DEVS_EMAILS], `[ERROR] No se pudo iniciar sesión en sistema WIN`, mensajeDecoded)
         console.info('📧 Mail enviado.')
         throw new Error(`[ERROR] No se pudo iniciar sesión: ${mensajeDecoded}`)
     }
