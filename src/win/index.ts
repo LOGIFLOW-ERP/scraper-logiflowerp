@@ -2,7 +2,7 @@ import axios from 'axios'
 import { wrapper } from 'axios-cookiejar-support'
 import { CookieJar } from 'tough-cookie'
 import { getData, login, SendData } from './services'
-import { buildModel } from './utils'
+import { buildModel, findAndRemoveDuplicates } from './utils'
 import { CompanyRootFields, MailService, MongoService } from '@/services'
 import { ENV } from '@/config'
 import { ScrapingSystem } from 'logiflowerp-sdk'
@@ -76,5 +76,6 @@ async function exec(company: CompanyRootFields) {
     await login(client, scrapingCredential, company)
     const data = await getData(client, scrapingCredential)
     const _data = await buildModel(data, mapaRequestNumber, mapaEmployees, company)
-    await new SendData().exec(_data, company.code)
+    const dataSend = findAndRemoveDuplicates(_data)
+    await new SendData().exec(dataSend, company.code)
 }
