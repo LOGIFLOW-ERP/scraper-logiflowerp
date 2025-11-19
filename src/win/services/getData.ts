@@ -83,6 +83,8 @@ export async function getData(
         paginaActual++
     }
 
+    await saveColumns(client, scrapingCredential, true)
+
     if (ENV.NODE_ENV === 'development') {
         fs.writeFileSync('data.json', JSON.stringify(todasLasOrdenes, null, 4), 'utf8')
     }

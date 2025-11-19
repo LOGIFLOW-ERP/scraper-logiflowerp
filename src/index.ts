@@ -14,7 +14,13 @@ class Job {
         console.log(`[${this.jobNameWin}] 🟢 Programado correctamente`)
         this.scraping_data_win = false
         schedule(
-            `*/30 * ${ENV.WIN_EXECUTION_START_HOUR}-${ENV.WIN_EXECUTION_END_HOUR} * * *`,
+            // `*/30 * ${ENV.WIN_EXECUTION_START_HOUR}-${ENV.WIN_EXECUTION_END_HOUR} * * *`,
+            '0 7,16,19 * * *',
+            this._execWin.bind(this),
+            { timezone: 'America/Lima' }
+        )
+        schedule(
+            '30 12 * * *',
             this._execWin.bind(this),
             { timezone: 'America/Lima' }
         )
