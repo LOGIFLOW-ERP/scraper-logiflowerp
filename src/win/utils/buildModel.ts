@@ -39,7 +39,7 @@ export async function buildModel(
                 : parseDateTime(el['Fin de Visita'], 'Fin de Visita', company)
             el['Fecha Estado'] = parseDateTime(el['Fecha Estado'], 'Fecha Estado', company)
             el['Fecha Solicitud'] = parseDateTime(el['Fecha Solicitud'], 'Fecha Solicitud', company)
-            parseHistorialEstados(el)
+            parseHistorialEstados(el, company)
             parseUbicacion(el)
             parseDatosTecnicos(el)
             parseSuscripcion(el)
