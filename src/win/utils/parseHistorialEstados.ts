@@ -1,7 +1,8 @@
 import { StateInternalOrderWin } from "logiflowerp-sdk"
 import { parseDateTime } from "./parseDateTime"
+import { CompanyRootFields } from "@/services"
 
-export function parseHistorialEstados(row: Record<string, any>) {
+export function parseHistorialEstados(row: Record<string, any>, company: CompanyRootFields) {
     row['Historial de Estados Interno'] = [
         {
             Fecha: new Date(),
@@ -23,7 +24,7 @@ export function parseHistorialEstados(row: Record<string, any>) {
         const observacionMatch = reg.match(/Observacion:\s(.*)$/)
 
         return {
-            Fecha: parseDateTime(fechaMatch ? fechaMatch[1].trim() : '', `Historial de Estados[${i}].Fecha`),
+            Fecha: parseDateTime(fechaMatch ? fechaMatch[1].trim() : '', `Historial de Estados[${i}].Fecha`, company),
             Estado: estadoMatch ? estadoMatch[1].trim() : null,
             Usuario: usuarioMatch ? usuarioMatch[1].trim() : null,
             Observacion: observacionMatch ? observacionMatch[1].trim() : ''
