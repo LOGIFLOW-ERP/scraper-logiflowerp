@@ -30,15 +30,15 @@ export async function buildModel(
                 continue
             }
 
-            el['Fecha Visita'] = parseDateTime(el['Fecha Visita'], 'Fecha Visita')
+            el['Fecha Visita'] = parseDateTime(el['Fecha Visita'], 'Fecha Visita', company)
             el['Inicio de Visita'] = el['Inicio de Visita'] === ''
                 ? new Date(0)
-                : parseDateTime(el['Inicio de Visita'], 'Inicio de Visita')
+                : parseDateTime(el['Inicio de Visita'], 'Inicio de Visita', company)
             el['Fin de Visita'] = el['Fin de Visita'] === ''
                 ? new Date(0)
-                : parseDateTime(el['Fin de Visita'], 'Fin de Visita')
-            el['Fecha Estado'] = parseDateTime(el['Fecha Estado'], 'Fecha Estado')
-            el['Fecha Solicitud'] = parseDateTime(el['Fecha Solicitud'], 'Fecha Solicitud')
+                : parseDateTime(el['Fin de Visita'], 'Fin de Visita', company)
+            el['Fecha Estado'] = parseDateTime(el['Fecha Estado'], 'Fecha Estado', company)
+            el['Fecha Solicitud'] = parseDateTime(el['Fecha Solicitud'], 'Fecha Solicitud', company)
             parseHistorialEstados(el)
             parseUbicacion(el)
             parseDatosTecnicos(el)

@@ -1,4 +1,6 @@
-export function parseDateTime(dateTimeStr: string, key: string) {
+import { CompanyRootFields } from "@/services"
+
+export function parseDateTime(dateTimeStr: string, key: string, company: CompanyRootFields) {
     try {
         // "dd/mm/yyyy hh:mm"
         const regex = /^\d{2}\/\d{2}\/\d{4}\s\d{2}:\d{2}$/
@@ -37,7 +39,18 @@ export function parseDateTime(dateTimeStr: string, key: string) {
             throw new Error('Formato inválido (Date)')
         }
 
-        return date
+        let utcDate = date
+
+        switch (company.country) {
+            case 'PER':
+                utcDate = new Date(date.getTime() + 5 * 60 * 60 * 1000)
+                break;
+
+            default:
+                throw new Error(`Formato inválido (Country): ${company.country}`)
+        }
+
+        return utcDate
     } catch (error) {
         console.log(key)
         throw error

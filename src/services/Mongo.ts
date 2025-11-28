@@ -11,7 +11,7 @@ import {
     State
 } from 'logiflowerp-sdk'
 
-const projectFields = { _id: 1, code: 1, scrapingTargets: 1, email: 1 } as const
+const projectFields = { _id: 1, code: 1, scrapingTargets: 1, email: 1, country: 1 } as const
 export type CompanyRootFields = Pick<RootCompanyENTITY, keyof typeof projectFields>
 
 export class MongoService {
